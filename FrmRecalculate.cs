@@ -21,121 +21,40 @@ namespace MonthReadingRecalculation
 
         delegate void SetTextCallback(string text, bool append = false);
 
-        private void SetRichTextBox2Text(string text, bool append = false)
+        private void SetRecalculateResultTxt(string text, bool append = false)
         {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
-            if (this.richTextBox2.InvokeRequired)
+            if (this.RecalculateResultTxt.InvokeRequired)
             {
-                SetTextCallback d = new SetTextCallback(SetRichTextBox2Text);
+                SetTextCallback d = new SetTextCallback(SetRecalculateResultTxt);
                 this.Invoke(d, new object[] { text, append });
             }
             else
             {
                 if (append)
                 {
-                    this.richTextBox2.AppendText(text);
+                    this.RecalculateResultTxt.AppendText(text);
                 }
                 else
                 {
-                    this.richTextBox2.Text = text;
+                    this.RecalculateResultTxt.Text = text;
                 }
             }
         }
 
         #region Recalculate month readings
-        private void button1_Click_1(object sender, EventArgs e)
+
+        private void RecalculateBtn_Click(object sender, EventArgs e)
         {
             try
             {
-
-                //char[] chactivity = "111".PadLeft(3, '0').ToCharArray();
-                //int meterSewage, meterGucode, meterActivity;
-                //var PhaseNo = int.Parse(chactivity[0].ToString());
-                //var activity = int.Parse(chactivity[1].ToString());
-                //var GUcode = int.Parse(chactivity[2].ToString());
-                //byte ActivityCodeinMeter = byte.Parse(activity.ToString());
-                //char[] meterstatebin;
-                //string resopn = "";
-                //string ValveStatus = "";
-                //int CloseValveReason;
-                //string Ans = Convert.ToString(144, 2);
-                //bool bValveStatus;
-
-                //Ans = Ans.PadLeft(16, '0');
-                //meterstatebin = Ans.ToCharArray();
-
-                //if (meterstatebin[0] == '1')
-                //{
-                //    resopn = " لتعطيل العداد بواسطة فنى ";
-                //    CloseValveReason = 1;
-                //}
-
-                //if (meterstatebin[1] == '1')
-                //{
-                //   // batresopn = batresopn = " حالة البطارية : لا يمكن استخدامها";
-                //  //  if (BatteryStatus == 0) BatteryStatus = 2;
-                //}
-
-                //if (meterstatebin[2] == '1')
-                //    resopn = "الرصيد المتبقى اقل من حد الفصل";
-
-                //if (meterstatebin[3] == '1') resopn = "استهلاك السماحية اكبر من حد السماحية ";
-
-                //if (meterstatebin[5] == '1' && meterstatebin[1] == '0')
-                //{
-                //   // batresopn = " حالة البطارية : ضعيفة من فضلك قم بتغيرها فى أسرع وقت";
-                //    //if (BatteryStatus == 0) BatteryStatus = 1;
-                //}
-
-                //if (meterstatebin[5] == '1' && meterstatebin[1] == '1')
-                //{
-                //   // batresopn = " حالة البطارية : ضعيفة لا يمكن استخدامها";
-                //  //  if (BatteryStatus == 2) BatteryStatus = 3;
-                //}
-
-                //if (meterstatebin[6] == '1') resopn = "meter's OverdraftCredit >0 ";
-
-                //if (meterstatebin[7] == '1' || meterstatebin[2] == '1')
-                //{
-                //    resopn = " بسبب صفر الرصيد ";
-                //    CloseValveReason = 2;
-                //}
-
-                //if (meterstatebin[12] == '1')
-                //{
-                //    resopn = " لفتح الغطاء ";
-                //    bValveStatus = true;
-                //    CloseValveReason = 3;
-                //}
-
-                //if (meterstatebin[11] == '0')
-                //{
-                //    bValveStatus = true;
-
-                //  //  if (Multilingual.BaseForm.ApplicationLanguage.Contains("Arabic"))
-                //        ValveStatus = " حالة المحبس : مغلق  " + " ---- " + resopn;
-                //    //else
-                //    //    ValveStatus = "Valve status : Closed ";
-                //}
-                //else
-                //{
-                //    bValveStatus = false;
-
-                //    //if (Multilingual.BaseForm.ApplicationLanguage.Contains("Arabic"))
-                //        ValveStatus = "حالة المحبس : مفتوح ";
-                //    //else
-                //    //    ValveStatus = "Valve status : Open ";
-                //}
-
-
-
                 progressBar1.Value = 0;
                 progressBar1.Step = 1;
                 progressBar1.Maximum = 0;
-                richTextBox2.Text = "";
-                SetRichTextBox2Text("");
+                RecalculateResultTxt.Text = "";
+                SetRecalculateResultTxt("");
                 label9.Text = "";
                 StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
                 Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
@@ -143,7 +62,7 @@ namespace MonthReadingRecalculation
                 Con.Append(";Data Source=" + textBox1.Text + ";");
                 this.connectionString = Con.ToString();
 
-                RecalculateMonthReading(richTextBox1.Text, checkBox1.Checked);
+                RecalculateMonthReadingThreading(richTextBox1.Text, checkBox1.Checked);
             }
             catch
             {
@@ -162,7 +81,7 @@ namespace MonthReadingRecalculation
             {
                 label9.Text = monthReadingList.Rows.Count.ToString();
                 worker = new BackgroundWorker();
-                Thread _thread = null;
+                //Thread _thread = null;
                 worker.WorkerReportsProgress = true;
                 progressBar1.Value = 0;
                 progressBar1.Step = 1;
@@ -171,60 +90,57 @@ namespace MonthReadingRecalculation
 
                 worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
-                    for (int i = 0; i < monthReadingList.Rows.Count; i++)
+                    for (int t = 0; t < monthReadingList.Rows.Count; t++)
                     {
+                        var i = t;
+
                         try
                         {
-                            worker.ReportProgress(i);
+                            worker.ReportProgress(t);
 
                             // Log data before 
-                            SetRichTextBox2Text("--------------------------------------------" + System.Environment.NewLine, true);
-                            //richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                            SetRichTextBox2Text("Start recalculate ID:" + monthReadingList.Rows[i]["ID"].ToString() +
-                                                    "- MeterID:" + monthReadingList.Rows[i]["MeterID"].ToString() +
-                                                    "- ActivityID:" + monthReadingList.Rows[i]["ActivityID"].ToString() +
-                                                    "- Year:" + monthReadingList.Rows[i]["Year"].ToString() +
-                                                    "- Month:" + monthReadingList.Rows[i]["Month"].ToString() +
-                                                    "- Read:" + monthReadingList.Rows[i]["Read"].ToString() +
-                                                    "- PhaseNo:" + monthReadingList.Rows[i]["PhaseNo"].ToString() +
-                                                    "- GuCode:" + monthReadingList.Rows[i]["GuCode"].ToString() +
-                                                    "- ConsumptionMoney:" + monthReadingList.Rows[i]["ConsumptionMoney"].ToString() +
-                                                    "- CBMPrice:" + monthReadingList.Rows[i]["CBMPrice"].ToString() +
-                                                    "- Healthy:" + monthReadingList.Rows[i]["Healthy"].ToString() +
-                                                    "- ServiceBox:" + monthReadingList.Rows[i]["ServiceBox"].ToString() +
-                                                    "- FixFee:" + monthReadingList.Rows[i]["FixFee"].ToString() +
-                                                    "- MeterFixFee:" + monthReadingList.Rows[i]["MeterFixFee"].ToString() + System.Environment.NewLine
+                            SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            SetRecalculateResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                                                    "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                                                    "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                                                    "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                                                    "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                                                    "- Read:" + monthReadingList.Rows[t]["Read"].ToString() +
+                                                    "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                                                    "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() +
+                                                    "- ConsumptionMoney:" + monthReadingList.Rows[t]["ConsumptionMoney"].ToString() +
+                                                    "- CBMPrice:" + monthReadingList.Rows[t]["CBMPrice"].ToString() +
+                                                    "- Healthy:" + monthReadingList.Rows[t]["Healthy"].ToString() +
+                                                    "- ServiceBox:" + monthReadingList.Rows[t]["ServiceBox"].ToString() +
+                                                    "- FixFee:" + monthReadingList.Rows[t]["FixFee"].ToString() +
+                                                    "- MeterFixFee:" + monthReadingList.Rows[t]["MeterFixFee"].ToString() + System.Environment.NewLine
                                 , true);
 
-                            //richTextBox2.AppendText("Start recalculate ID:" + monthReadingList.Rows[i]["ID"].ToString() +
-                            //                        "- MeterID:" + monthReadingList.Rows[i]["MeterID"].ToString() +
-                            //                        "- ActivityID:" + monthReadingList.Rows[i]["ActivityID"].ToString() +
-                            //                        "- Year:" + monthReadingList.Rows[i]["Year"].ToString() +
-                            //                        "- Month:" + monthReadingList.Rows[i]["Month"].ToString() +
-                            //                        "- Read:" + monthReadingList.Rows[i]["Read"].ToString() +
-                            //                        "- PhaseNo:" + monthReadingList.Rows[i]["PhaseNo"].ToString() +
-                            //                        "- GuCode:" + monthReadingList.Rows[i]["GuCode"].ToString() +
-                            //                        "- ConsumptionMoney:" + monthReadingList.Rows[i]["ConsumptionMoney"].ToString() +
-                            //                        "- CBMPrice:" + monthReadingList.Rows[i]["CBMPrice"].ToString() +
-                            //                        "- Healthy:" + monthReadingList.Rows[i]["Healthy"].ToString() +
-                            //                        "- ServiceBox:" + monthReadingList.Rows[i]["ServiceBox"].ToString() +
-                            //                        "- FixFee:" + monthReadingList.Rows[i]["FixFee"].ToString() +
-                            //                        "- MeterFixFee:" + monthReadingList.Rows[i]["MeterFixFee"].ToString() + System.Environment.NewLine);
+                            if (i < monthReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    //_thread = new Thread(() => 
+                                    RecalculateWaterMonthReadings(
+                                     int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                     monthReadingList.Rows[i]["MeterID"].ToString(),
+                                     int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
+                                     int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
+                                     decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
+                                     monthReadingList.Rows[i]["ActivityID"].ToString(),
+                                     int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
+                                     int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
+                                     decimal.Parse(monthReadingList.Rows[i]["meterFixFee"].ToString()),
+                                     IncludeEstidama
+                                     );
+                                   // );
 
-                            _thread = new Thread(() => RecalculateWaterMonthReadings(
-                                int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
-                                monthReadingList.Rows[i]["MeterID"].ToString(),
-                                int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
-                                int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
-                                decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
-                                monthReadingList.Rows[i]["ActivityID"].ToString(),
-                                int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
-                                int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
-                                decimal.Parse(monthReadingList.Rows[i]["meterFixFee"].ToString()),
-                                IncludeEstidama
-                                ));
-                            _thread.Start();
-                            Thread.Sleep(1000);
+                                   // _thread.Start();
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -244,39 +160,6 @@ namespace MonthReadingRecalculation
                 // Handle complete
                 worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
                 worker.RunWorkerAsync();
-
-
-                //foreach (DataRow dr in monthReadingList.Rows)
-                //{
-                //    // Log data before 
-                //    richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                //    richTextBox2.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
-                //                            "- MeterID:" + dr["MeterID"].ToString() +
-                //                            "- ActivityID:" + dr["ActivityID"].ToString() +
-                //                            "- Year:" + dr["Year"].ToString() +
-                //                            "- Month:" + dr["Month"].ToString() +
-                //                            "- Read:" + dr["Read"].ToString() +
-                //                            "- PhaseNo:" + dr["PhaseNo"].ToString() +
-                //                            "- GuCode:" + dr["GuCode"].ToString() +
-                //                            "- ConsumptionMoney:" + dr["ConsumptionMoney"].ToString() +
-                //                            "- CBMPrice:" + dr["CBMPrice"].ToString() +
-                //                            "- Healthy:" + dr["Healthy"].ToString() +
-                //                            "- ServiceBox:" + dr["ServiceBox"].ToString() +
-                //                            "- FixFee:" + dr["FixFee"].ToString() +
-                //                            "- MeterFixFee:" + dr["MeterFixFee"].ToString() + System.Environment.NewLine);
-
-                //    RecalculateWaterMonthReadings(
-                //        int.Parse(dr["ID"].ToString()),
-                //        dr["MeterID"].ToString(),
-                //        int.Parse(dr["Year"].ToString()),
-                //        int.Parse(dr["Month"].ToString()),
-                //        decimal.Parse(dr["Read"].ToString()),
-                //        dr["ActivityID"].ToString(),
-                //        int.Parse(dr["PhaseNo"].ToString()),
-                //        int.Parse(dr["GuCode"].ToString()),
-                //        decimal.Parse(dr["meterFixFee"].ToString()),
-                //        IncludeEstidama);
-                //}
             }
             else
             {
@@ -299,8 +182,8 @@ namespace MonthReadingRecalculation
                 foreach (DataRow dr in monthReadingList.Rows)
                 {
                     // Log data before 
-                    richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox2.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
+                    RecalculateResultTxt.AppendText("--------------------------------------------" + System.Environment.NewLine);
+                    RecalculateResultTxt.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
                                             "- MeterID:" + dr["MeterID"].ToString() +
                                             "- ActivityID:" + dr["ActivityID"].ToString() +
                                             "- Year:" + dr["Year"].ToString() +
@@ -405,7 +288,8 @@ namespace MonthReadingRecalculation
                 // Log data after
                 if (res)
                 {
-                    SetRichTextBox2Text(
+                    SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                    SetRecalculateResultTxt(
                                         "End recalculate   ID:" + MonthReadingID +
                                         "- MeterID:" + MeterID +
                                         "- ActivityID:" + ActivityID +
@@ -424,12 +308,12 @@ namespace MonthReadingRecalculation
                 }
                 else
                 {
-                    SetRichTextBox2Text("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                    SetRecalculateResultTxt("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
                 }
             }
             catch
             {
-                SetRichTextBox2Text("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                SetRecalculateResultTxt("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
             }
 
             return true;
@@ -519,6 +403,24 @@ namespace MonthReadingRecalculation
             try
             {
                 string sql = " select top 1 ActivityID , GuCode , Sewage from [dbo].[WaterMetersReadings] where [MeterId] = '" + meterID + "' and CONVERT(datetime, serverDate, 101)  < CONVERT(datetime, '" + SpecificDate.AddMonths(1).ToString("yyyy-MM-dd") + "' , 101 ) order by serverDate desc";
+                return new dboperation(connectionString).SelectData(sql);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///  Get meter details
+        /// </summary>
+        /// <param name="meterID">Meter identifier</param>
+        /// <param name="SpecificDate">Specific date</param>
+        public DataTable GetLatestWaterMeterReadingDetails(string meterID, System.DateTime SpecificDate)
+        {
+            try
+            {
+                string sql = " select top 1 ActivityID , GuCode , Sewage from [dbo].[WaterMetersReadings] where [MeterId] = '" + meterID + "' and CONVERT(datetime, serverDate, 101)  > CONVERT(datetime, '" + SpecificDate.AddMonths(1).ToString("yyyy-MM-dd") + "' , 101 ) order by serverDate";
                 return new dboperation(connectionString).SelectData(sql);
             }
             catch (Exception ex)
@@ -957,7 +859,7 @@ namespace MonthReadingRecalculation
 
             if (monthReadingList != null && monthReadingList.Rows.Count > 0)
             {
-          
+
                 foreach (DataRow dr in monthReadingList.Rows)
                 {
                     counter++;
@@ -1033,14 +935,27 @@ namespace MonthReadingRecalculation
                         }
                         else
                         {
-                            var mtrDetails = GetMeterDetails(MeterID);
-                            if (mtrDetails != null && mtrDetails.Rows.Count > 0)
+                            var wMeterReading_2 = GetLatestWaterMeterReadingDetails(MeterID, monthDate);
+
+                            if (wMeterReading_2 != null && wMeterReading_2.Rows.Count > 0)
                             {
-                                ActivityID = mtrDetails.Rows[0]["ActivityId"].ToString();
-                                meterUnits = int.Parse(mtrDetails.Rows[0]["GuCode"].ToString());
-                                sewage = int.Parse(mtrDetails.Rows[0]["PhaseNo"].ToString());
+                                ActivityID = wMeterReading_2.Rows[0]["ActivityId"].ToString();
+                                meterUnits = int.Parse(wMeterReading_2.Rows[0]["GuCode"].ToString());
+                                sewage = int.Parse(wMeterReading_2.Rows[0]["Sewage"].ToString());
+                            }
+                            else
+                            {
+                                var mtrDetails = GetMeterDetails(MeterID);
+
+                                if (mtrDetails != null && mtrDetails.Rows.Count > 0)
+                                {
+                                    ActivityID = mtrDetails.Rows[0]["ActivityId"].ToString();
+                                    meterUnits = int.Parse(mtrDetails.Rows[0]["GuCode"].ToString());
+                                    sewage = int.Parse(mtrDetails.Rows[0]["PhaseNo"].ToString());
+                                }
                             }
                         }
+
                     }
                 }
                 catch (Exception)

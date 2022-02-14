@@ -38,11 +38,13 @@ namespace MonthReadingRecalculation
             this.label9 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.RecalculateBtn = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.RecalculateResultTxt = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.richTextBox7 = new System.Windows.Forms.RichTextBox();
             this.richTextBox6 = new System.Windows.Forms.RichTextBox();
             this.button4 = new System.Windows.Forms.Button();
@@ -58,8 +60,6 @@ namespace MonthReadingRecalculation
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.tabPage4.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage5.SuspendLayout();
@@ -121,9 +121,9 @@ namespace MonthReadingRecalculation
             this.tabPage2.Controls.Add(this.label9);
             this.tabPage2.Controls.Add(this.progressBar1);
             this.tabPage2.Controls.Add(this.checkBox1);
-            this.tabPage2.Controls.Add(this.button1);
+            this.tabPage2.Controls.Add(this.RecalculateBtn);
             this.tabPage2.Controls.Add(this.richTextBox1);
-            this.tabPage2.Controls.Add(this.richTextBox2);
+            this.tabPage2.Controls.Add(this.RecalculateResultTxt);
             this.tabPage2.Controls.Add(this.label1);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
@@ -158,15 +158,15 @@ namespace MonthReadingRecalculation
             this.checkBox1.Text = "Include estidama";
             this.checkBox1.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // RecalculateBtn
             // 
-            this.button1.Location = new System.Drawing.Point(205, 133);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(93, 30);
-            this.button1.TabIndex = 18;
-            this.button1.Text = "Recalculate";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            this.RecalculateBtn.Location = new System.Drawing.Point(205, 133);
+            this.RecalculateBtn.Name = "RecalculateBtn";
+            this.RecalculateBtn.Size = new System.Drawing.Size(93, 30);
+            this.RecalculateBtn.TabIndex = 18;
+            this.RecalculateBtn.Text = "Recalculate";
+            this.RecalculateBtn.UseVisualStyleBackColor = true;
+            this.RecalculateBtn.Click += new System.EventHandler(this.RecalculateBtn_Click);
             // 
             // richTextBox1
             // 
@@ -176,14 +176,14 @@ namespace MonthReadingRecalculation
             this.richTextBox1.TabIndex = 19;
             this.richTextBox1.Text = "";
             // 
-            // richTextBox2
+            // RecalculateResultTxt
             // 
-            this.richTextBox2.Location = new System.Drawing.Point(24, 184);
-            this.richTextBox2.Name = "richTextBox2";
-            this.richTextBox2.ReadOnly = true;
-            this.richTextBox2.Size = new System.Drawing.Size(785, 265);
-            this.richTextBox2.TabIndex = 21;
-            this.richTextBox2.Text = "";
+            this.RecalculateResultTxt.Location = new System.Drawing.Point(24, 184);
+            this.RecalculateResultTxt.Name = "RecalculateResultTxt";
+            this.RecalculateResultTxt.ReadOnly = true;
+            this.RecalculateResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.RecalculateResultTxt.TabIndex = 21;
+            this.RecalculateResultTxt.Text = "";
             // 
             // label1
             // 
@@ -209,6 +209,24 @@ namespace MonthReadingRecalculation
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "UpdateMonthReadingData";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(115, 146);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(16, 17);
+            this.label10.TabIndex = 26;
+            this.label10.Text = "0";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(44, 146);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(56, 17);
+            this.label7.TabIndex = 25;
+            this.label7.Text = "counter";
             // 
             // richTextBox7
             // 
@@ -349,24 +367,6 @@ namespace MonthReadingRecalculation
             this.tabControl1.Size = new System.Drawing.Size(846, 509);
             this.tabControl1.TabIndex = 18;
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(44, 146);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(56, 17);
-            this.label7.TabIndex = 25;
-            this.label7.Text = "counter";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(115, 146);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(0, 17);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "0";
-            // 
             // FrmRecalculate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -400,9 +400,9 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button RecalculateBtn;
         private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.RichTextBox richTextBox2;
+        private System.Windows.Forms.RichTextBox RecalculateResultTxt;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TabPage tabPage5;
         private System.Windows.Forms.RichTextBox richTextBox7;
