@@ -30,14 +30,14 @@ namespace MonthReadingRecalculation
         private void InitializeComponent()
         {
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.button2 = new System.Windows.Forms.Button();
+            this.CancelBtn = new System.Windows.Forms.Button();
             this.richTextBox3 = new System.Windows.Forms.RichTextBox();
             this.richTextBox4 = new System.Windows.Forms.RichTextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.label9 = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.RecalcProgressLbl = new System.Windows.Forms.Label();
+            this.RecalcProgressBar = new System.Windows.Forms.ProgressBar();
+            this.IncudeEstidamaCkBx = new System.Windows.Forms.CheckBox();
             this.RecalculateBtn = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.RecalculateResultTxt = new System.Windows.Forms.RichTextBox();
@@ -70,7 +70,7 @@ namespace MonthReadingRecalculation
             // 
             // tabPage4
             // 
-            this.tabPage4.Controls.Add(this.button2);
+            this.tabPage4.Controls.Add(this.CancelBtn);
             this.tabPage4.Controls.Add(this.richTextBox3);
             this.tabPage4.Controls.Add(this.richTextBox4);
             this.tabPage4.Controls.Add(this.label6);
@@ -81,15 +81,15 @@ namespace MonthReadingRecalculation
             this.tabPage4.Text = "Cancel Charges";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // CancelBtn
             // 
-            this.button2.Location = new System.Drawing.Point(359, 135);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(93, 30);
-            this.button2.TabIndex = 22;
-            this.button2.Text = "Cancel charges";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.CancelBtn.Location = new System.Drawing.Point(359, 135);
+            this.CancelBtn.Name = "CancelBtn";
+            this.CancelBtn.Size = new System.Drawing.Size(93, 30);
+            this.CancelBtn.TabIndex = 22;
+            this.CancelBtn.Text = "Cancel charges";
+            this.CancelBtn.UseVisualStyleBackColor = true;
+            this.CancelBtn.Click += new System.EventHandler(this.CancelBtn_Click);
             // 
             // richTextBox3
             // 
@@ -118,9 +118,9 @@ namespace MonthReadingRecalculation
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.label9);
-            this.tabPage2.Controls.Add(this.progressBar1);
-            this.tabPage2.Controls.Add(this.checkBox1);
+            this.tabPage2.Controls.Add(this.RecalcProgressLbl);
+            this.tabPage2.Controls.Add(this.RecalcProgressBar);
+            this.tabPage2.Controls.Add(this.IncudeEstidamaCkBx);
             this.tabPage2.Controls.Add(this.RecalculateBtn);
             this.tabPage2.Controls.Add(this.richTextBox1);
             this.tabPage2.Controls.Add(this.RecalculateResultTxt);
@@ -133,30 +133,30 @@ namespace MonthReadingRecalculation
             this.tabPage2.Text = "RecalculateMonthReadings";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label9
+            // RecalcProgressLbl
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(577, 139);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(0, 17);
-            this.label9.TabIndex = 24;
+            this.RecalcProgressLbl.AutoSize = true;
+            this.RecalcProgressLbl.Location = new System.Drawing.Point(577, 139);
+            this.RecalcProgressLbl.Name = "RecalcProgressLbl";
+            this.RecalcProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.RecalcProgressLbl.TabIndex = 24;
             // 
-            // progressBar1
+            // RecalcProgressBar
             // 
-            this.progressBar1.Location = new System.Drawing.Point(329, 137);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(242, 23);
-            this.progressBar1.TabIndex = 23;
+            this.RecalcProgressBar.Location = new System.Drawing.Point(329, 137);
+            this.RecalcProgressBar.Name = "RecalcProgressBar";
+            this.RecalcProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.RecalcProgressBar.TabIndex = 23;
             // 
-            // checkBox1
+            // IncudeEstidamaCkBx
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(24, 139);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(132, 21);
-            this.checkBox1.TabIndex = 22;
-            this.checkBox1.Text = "Include estidama";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.IncudeEstidamaCkBx.AutoSize = true;
+            this.IncudeEstidamaCkBx.Location = new System.Drawing.Point(24, 139);
+            this.IncudeEstidamaCkBx.Name = "IncudeEstidamaCkBx";
+            this.IncudeEstidamaCkBx.Size = new System.Drawing.Size(132, 21);
+            this.IncudeEstidamaCkBx.TabIndex = 22;
+            this.IncudeEstidamaCkBx.Text = "Include estidama";
+            this.IncudeEstidamaCkBx.UseVisualStyleBackColor = true;
             // 
             // RecalculateBtn
             // 
@@ -392,14 +392,14 @@ namespace MonthReadingRecalculation
         #endregion
 
         private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button CancelBtn;
         private System.Windows.Forms.RichTextBox richTextBox3;
         private System.Windows.Forms.RichTextBox richTextBox4;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Label RecalcProgressLbl;
+        private System.Windows.Forms.ProgressBar RecalcProgressBar;
+        private System.Windows.Forms.CheckBox IncudeEstidamaCkBx;
         private System.Windows.Forms.Button RecalculateBtn;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.RichTextBox RecalculateResultTxt;
