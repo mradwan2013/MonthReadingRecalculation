@@ -31,23 +31,23 @@ namespace MonthReadingRecalculation
         {
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.CancelBtn = new System.Windows.Forms.Button();
-            this.richTextBox3 = new System.Windows.Forms.RichTextBox();
-            this.richTextBox4 = new System.Windows.Forms.RichTextBox();
+            this.CancelChargesQueryTxt = new System.Windows.Forms.RichTextBox();
+            this.CancelChargesResultTxt = new System.Windows.Forms.RichTextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.RecalcProgressLbl = new System.Windows.Forms.Label();
             this.RecalcProgressBar = new System.Windows.Forms.ProgressBar();
             this.IncudeEstidamaCkBx = new System.Windows.Forms.CheckBox();
             this.RecalculateBtn = new System.Windows.Forms.Button();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.RecalcQueryTxt = new System.Windows.Forms.RichTextBox();
             this.RecalculateResultTxt = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.richTextBox7 = new System.Windows.Forms.RichTextBox();
-            this.richTextBox6 = new System.Windows.Forms.RichTextBox();
-            this.button4 = new System.Windows.Forms.Button();
+            this.UpdateProgressBar = new System.Windows.Forms.ProgressBar();
+            this.UpdateProgressLbl = new System.Windows.Forms.Label();
+            this.UpdateDataResultTxt = new System.Windows.Forms.RichTextBox();
+            this.UpdateQueryTxt = new System.Windows.Forms.RichTextBox();
+            this.UpdateMRDataBtn = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -71,8 +71,8 @@ namespace MonthReadingRecalculation
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.CancelBtn);
-            this.tabPage4.Controls.Add(this.richTextBox3);
-            this.tabPage4.Controls.Add(this.richTextBox4);
+            this.tabPage4.Controls.Add(this.CancelChargesQueryTxt);
+            this.tabPage4.Controls.Add(this.CancelChargesResultTxt);
             this.tabPage4.Controls.Add(this.label6);
             this.tabPage4.Location = new System.Drawing.Point(4, 25);
             this.tabPage4.Name = "tabPage4";
@@ -91,22 +91,22 @@ namespace MonthReadingRecalculation
             this.CancelBtn.UseVisualStyleBackColor = true;
             this.CancelBtn.Click += new System.EventHandler(this.CancelBtn_Click);
             // 
-            // richTextBox3
+            // CancelChargesQueryTxt
             // 
-            this.richTextBox3.Location = new System.Drawing.Point(28, 54);
-            this.richTextBox3.Name = "richTextBox3";
-            this.richTextBox3.Size = new System.Drawing.Size(785, 75);
-            this.richTextBox3.TabIndex = 23;
-            this.richTextBox3.Text = "";
+            this.CancelChargesQueryTxt.Location = new System.Drawing.Point(28, 54);
+            this.CancelChargesQueryTxt.Name = "CancelChargesQueryTxt";
+            this.CancelChargesQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.CancelChargesQueryTxt.TabIndex = 23;
+            this.CancelChargesQueryTxt.Text = "";
             // 
-            // richTextBox4
+            // CancelChargesResultTxt
             // 
-            this.richTextBox4.Location = new System.Drawing.Point(28, 189);
-            this.richTextBox4.Name = "richTextBox4";
-            this.richTextBox4.ReadOnly = true;
-            this.richTextBox4.Size = new System.Drawing.Size(785, 265);
-            this.richTextBox4.TabIndex = 25;
-            this.richTextBox4.Text = "";
+            this.CancelChargesResultTxt.Location = new System.Drawing.Point(28, 189);
+            this.CancelChargesResultTxt.Name = "CancelChargesResultTxt";
+            this.CancelChargesResultTxt.ReadOnly = true;
+            this.CancelChargesResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.CancelChargesResultTxt.TabIndex = 25;
+            this.CancelChargesResultTxt.Text = "";
             // 
             // label6
             // 
@@ -122,7 +122,7 @@ namespace MonthReadingRecalculation
             this.tabPage2.Controls.Add(this.RecalcProgressBar);
             this.tabPage2.Controls.Add(this.IncudeEstidamaCkBx);
             this.tabPage2.Controls.Add(this.RecalculateBtn);
-            this.tabPage2.Controls.Add(this.richTextBox1);
+            this.tabPage2.Controls.Add(this.RecalcQueryTxt);
             this.tabPage2.Controls.Add(this.RecalculateResultTxt);
             this.tabPage2.Controls.Add(this.label1);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
@@ -168,13 +168,14 @@ namespace MonthReadingRecalculation
             this.RecalculateBtn.UseVisualStyleBackColor = true;
             this.RecalculateBtn.Click += new System.EventHandler(this.RecalculateBtn_Click);
             // 
-            // richTextBox1
+            // RecalcQueryTxt
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(24, 49);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(785, 75);
-            this.richTextBox1.TabIndex = 19;
-            this.richTextBox1.Text = "";
+            this.RecalcQueryTxt.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.RecalcQueryTxt.Location = new System.Drawing.Point(24, 49);
+            this.RecalcQueryTxt.Name = "RecalcQueryTxt";
+            this.RecalcQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.RecalcQueryTxt.TabIndex = 19;
+            this.RecalcQueryTxt.Text = "";
             // 
             // RecalculateResultTxt
             // 
@@ -196,11 +197,11 @@ namespace MonthReadingRecalculation
             // 
             // tabPage5
             // 
-            this.tabPage5.Controls.Add(this.label10);
-            this.tabPage5.Controls.Add(this.label7);
-            this.tabPage5.Controls.Add(this.richTextBox7);
-            this.tabPage5.Controls.Add(this.richTextBox6);
-            this.tabPage5.Controls.Add(this.button4);
+            this.tabPage5.Controls.Add(this.UpdateProgressBar);
+            this.tabPage5.Controls.Add(this.UpdateProgressLbl);
+            this.tabPage5.Controls.Add(this.UpdateDataResultTxt);
+            this.tabPage5.Controls.Add(this.UpdateQueryTxt);
+            this.tabPage5.Controls.Add(this.UpdateMRDataBtn);
             this.tabPage5.Controls.Add(this.label8);
             this.tabPage5.Location = new System.Drawing.Point(4, 25);
             this.tabPage5.Name = "tabPage5";
@@ -210,51 +211,49 @@ namespace MonthReadingRecalculation
             this.tabPage5.Text = "UpdateMonthReadingData";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
-            // label10
+            // UpdateProgressBar
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(115, 146);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(16, 17);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "0";
+            this.UpdateProgressBar.Location = new System.Drawing.Point(208, 149);
+            this.UpdateProgressBar.Name = "UpdateProgressBar";
+            this.UpdateProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.UpdateProgressBar.TabIndex = 27;
             // 
-            // label7
+            // UpdateProgressLbl
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(44, 146);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(56, 17);
-            this.label7.TabIndex = 25;
-            this.label7.Text = "counter";
+            this.UpdateProgressLbl.AutoSize = true;
+            this.UpdateProgressLbl.Location = new System.Drawing.Point(456, 152);
+            this.UpdateProgressLbl.Name = "UpdateProgressLbl";
+            this.UpdateProgressLbl.Size = new System.Drawing.Size(56, 17);
+            this.UpdateProgressLbl.TabIndex = 25;
+            this.UpdateProgressLbl.Text = "counter";
             // 
-            // richTextBox7
+            // UpdateDataResultTxt
             // 
-            this.richTextBox7.Location = new System.Drawing.Point(25, 191);
-            this.richTextBox7.Name = "richTextBox7";
-            this.richTextBox7.ReadOnly = true;
-            this.richTextBox7.Size = new System.Drawing.Size(785, 265);
-            this.richTextBox7.TabIndex = 24;
-            this.richTextBox7.Text = "";
+            this.UpdateDataResultTxt.Location = new System.Drawing.Point(25, 191);
+            this.UpdateDataResultTxt.Name = "UpdateDataResultTxt";
+            this.UpdateDataResultTxt.ReadOnly = true;
+            this.UpdateDataResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.UpdateDataResultTxt.TabIndex = 24;
+            this.UpdateDataResultTxt.Text = "";
             // 
-            // richTextBox6
+            // UpdateQueryTxt
             // 
-            this.richTextBox6.EnableAutoDragDrop = true;
-            this.richTextBox6.Location = new System.Drawing.Point(25, 58);
-            this.richTextBox6.Name = "richTextBox6";
-            this.richTextBox6.Size = new System.Drawing.Size(785, 75);
-            this.richTextBox6.TabIndex = 21;
-            this.richTextBox6.Text = "";
+            this.UpdateQueryTxt.EnableAutoDragDrop = true;
+            this.UpdateQueryTxt.Location = new System.Drawing.Point(25, 58);
+            this.UpdateQueryTxt.Name = "UpdateQueryTxt";
+            this.UpdateQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.UpdateQueryTxt.TabIndex = 21;
+            this.UpdateQueryTxt.Text = "";
             // 
-            // button4
+            // UpdateMRDataBtn
             // 
-            this.button4.Location = new System.Drawing.Point(305, 139);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(93, 30);
-            this.button4.TabIndex = 23;
-            this.button4.Text = "Update";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.UpdateMRDataBtn.Location = new System.Drawing.Point(90, 145);
+            this.UpdateMRDataBtn.Name = "UpdateMRDataBtn";
+            this.UpdateMRDataBtn.Size = new System.Drawing.Size(93, 30);
+            this.UpdateMRDataBtn.TabIndex = 23;
+            this.UpdateMRDataBtn.Text = "Update";
+            this.UpdateMRDataBtn.UseVisualStyleBackColor = true;
+            this.UpdateMRDataBtn.Click += new System.EventHandler(this.UpdateMRDataBtn_Click);
             // 
             // label8
             // 
@@ -393,21 +392,18 @@ namespace MonthReadingRecalculation
 
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.Button CancelBtn;
-        private System.Windows.Forms.RichTextBox richTextBox3;
-        private System.Windows.Forms.RichTextBox richTextBox4;
+        private System.Windows.Forms.RichTextBox CancelChargesResultTxt;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label RecalcProgressLbl;
         private System.Windows.Forms.ProgressBar RecalcProgressBar;
         private System.Windows.Forms.CheckBox IncudeEstidamaCkBx;
         private System.Windows.Forms.Button RecalculateBtn;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.RichTextBox RecalculateResultTxt;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TabPage tabPage5;
-        private System.Windows.Forms.RichTextBox richTextBox7;
-        private System.Windows.Forms.RichTextBox richTextBox6;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.RichTextBox UpdateDataResultTxt;
+        private System.Windows.Forms.Button UpdateMRDataBtn;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -420,7 +416,10 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label UpdateProgressLbl;
+        public System.Windows.Forms.RichTextBox RecalcQueryTxt;
+        public System.Windows.Forms.RichTextBox UpdateQueryTxt;
+        public System.Windows.Forms.RichTextBox CancelChargesQueryTxt;
+        private System.Windows.Forms.ProgressBar UpdateProgressBar;
     }
 }

@@ -43,6 +43,30 @@ namespace MonthReadingRecalculation
             }
         }
 
+        private void SetUpdateDataResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.UpdateDataResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetUpdateDataResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.UpdateDataResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.UpdateDataResultTxt.Text = text;
+                }
+            }
+        }
+
+
         private void RecalculateBtn_Click(object sender, EventArgs e)
         {
             try
@@ -54,7 +78,7 @@ namespace MonthReadingRecalculation
                 RecalcProgressLbl.Text = "";
 
                 ConnectDB();
-                RecalculateMonthReadingThreading(richTextBox1.Text, IncudeEstidamaCkBx.Checked);
+                RecalculateMonthReading(RecalcQueryTxt.Text, IncudeEstidamaCkBx.Checked);
             }
             catch
             {
@@ -65,7 +89,7 @@ namespace MonthReadingRecalculation
         /// Recalculate water meter month readings based on table query  using threads
         /// </summary>
         /// <param name="MonthReadingQuery">Month reading query</param>
-        public void RecalculateMonthReadingThreading(string MonthReadingQuery, bool IncludeEstidama = false)
+        public void RecalculateMonthReading(string MonthReadingQuery, bool IncludeEstidama = false)
         {
             DataTable monthReadingList = ExecuteSelectQuery(MonthReadingQuery);
 
@@ -73,7 +97,6 @@ namespace MonthReadingRecalculation
             {
                 RecalcProgressLbl.Text = monthReadingList.Rows.Count.ToString();
                 worker = new BackgroundWorker();
-                //Thread _thread = null;
                 worker.WorkerReportsProgress = true;
                 RecalcProgressBar.Value = 0;
                 RecalcProgressBar.Step = 1;
@@ -265,7 +288,6 @@ namespace MonthReadingRecalculation
 
         #region Shared
 
-
         public void ConnectDB()
         {
             StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
@@ -416,7 +438,7 @@ namespace MonthReadingRecalculation
             try
             {
                 var query = "select [dbo].[GetActivityFixedFeeWithConsumption] ('" + meterID + "','" + activityID + "','" + UnitNo + "','" + tarriffDate.ToString("yyyy-MM-dd") + "'," + quantity + ")"; // GetMeterFixedFee
-               return Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
+                return Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
             }
             catch
             {
@@ -575,15 +597,20 @@ namespace MonthReadingRecalculation
             }
         }
 
-#endregion
-
+        #endregion
 
         #region Cancel charges
 
         private void CancelBtn_Click(object sender, EventArgs e)
         {
+            //RecalcProgressBar.Value = 0;
+            //RecalcProgressBar.Step = 1;
+            //RecalcProgressBar.Maximum = 0;
+            CancelChargesResultTxt.Text = "";
+            //RecalcProgressLbl.Text = "";
+
             ConnectDB();
-            CancelCharges(richTextBox3.Text);
+            CancelCharges(CancelChargesQueryTxt.Text);
         }
 
         /// <summary>
@@ -616,17 +643,17 @@ namespace MonthReadingRecalculation
                 foreach (DataRow dr in chargesList.Rows)
                 {
                     // Log data before 
-                    richTextBox4.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox4.AppendText("Start cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
+                    CancelChargesResultTxt.AppendText("--------------------------------------------" + System.Environment.NewLine);
+                    CancelChargesResultTxt.AppendText("Start cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
 
                     // Log data after
                     if (CancelCharge(dr["SerialNo"].ToString()))
                     {
-                        richTextBox4.AppendText("End: Success to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
+                        CancelChargesResultTxt.AppendText("End: Success to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
                     }
                     else
                     {
-                        richTextBox4.AppendText("End: Failed to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
+                        CancelChargesResultTxt.AppendText("End: Failed to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
                     }
                 }
             }
@@ -758,17 +785,18 @@ namespace MonthReadingRecalculation
 
         #endregion
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            label10.Text = "0";
-            richTextBox7.Text = "";
-            StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
-            Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
-            Con.Append(";Initial Catalog=" + textBox2.Text);
-            Con.Append(";Data Source=" + textBox1.Text + ";");
-            this.connectionString = Con.ToString();
+        #region Update month readings data
 
-            UpdateMonthReading(richTextBox6.Text);
+        private void UpdateMRDataBtn_Click(object sender, EventArgs e)
+        {
+            UpdateProgressBar.Value = 0;
+            UpdateProgressBar.Step = 1;
+            UpdateProgressBar.Maximum = 0;
+            UpdateDataResultTxt.Text = "";
+            UpdateProgressLbl.Text = "";
+
+            ConnectDB();
+            UpdateMonthReading(UpdateQueryTxt.Text);
         }
 
         /// <summary>
@@ -778,34 +806,80 @@ namespace MonthReadingRecalculation
         public void UpdateMonthReading(string MonthReadingQuery)
         {
             DataTable monthReadingList = ExecuteSelectQuery(MonthReadingQuery);
-            int counter = 0;
 
             if (monthReadingList != null && monthReadingList.Rows.Count > 0)
             {
 
-                foreach (DataRow dr in monthReadingList.Rows)
+                UpdateProgressLbl.Text = monthReadingList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                UpdateProgressBar.Maximum = monthReadingList.Rows.Count;
+                UpdateProgressLbl.Text = string.Format("{0} records Completed", UpdateProgressBar.Value);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
-                    counter++;
-                    label10.Text = counter + "";
+                    for (int t = 0; t < monthReadingList.Rows.Count; t++)
+                    {
+                        var i = t;
 
-                    // Log data before 
-                    richTextBox7.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox7.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
-                                            "- MeterID:" + dr["MeterID"].ToString() +
-                                            "- ActivityID:" + dr["ActivityID"].ToString() +
-                                            "- Year:" + dr["Year"].ToString() +
-                                            "- Month:" + dr["Month"].ToString() +
-                                            "- PhaseNo:" + dr["PhaseNo"].ToString() +
-                                            "- GuCode:" + dr["GuCode"].ToString() + System.Environment.NewLine);
+                        try
+                        {
+                            worker.ReportProgress(t);
 
-                    UpdateWaterMonthReadings(int.Parse(dr["ID"].ToString()),
-                        dr["MeterID"].ToString(),
-                        int.Parse(dr["Year"].ToString()),
-                        int.Parse(dr["Month"].ToString()),
-                        dr["ActivityID"].ToString(),
-                        int.Parse(dr["PhaseNo"].ToString()),
-                        int.Parse(dr["GuCode"].ToString()));
-                }
+                            // Log data before 
+                            SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            SetUpdateDataResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                                                "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                                                "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                                                "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                                                "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                                                "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                                                "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
+                                , true);
+
+                            if (i < monthReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                        monthReadingList.Rows[i]["MeterID"].ToString(),
+                                        int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
+                                        int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
+                                        monthReadingList.Rows[i]["ActivityID"].ToString(),
+                                        int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
+                                        int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()));
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    UpdateProgressBar.PerformStep();
+                    UpdateProgressLbl.Text = string.Format("{0} records Completed", UpdateProgressBar.Value);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                UpdateProgressBar.Maximum = 0;
             }
         }
 
@@ -878,23 +952,24 @@ namespace MonthReadingRecalculation
                                 }
                             }
                         }
-
                     }
                 }
                 catch (Exception)
                 {
                     // Log data after
-                    richTextBox7.AppendText("Failed MeterID:" + MeterID + System.Environment.NewLine);
+                    SetUpdateDataResultTxt("Failed MeterID:" + MeterID + System.Environment.NewLine, true);
+                    SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
                 }
 
                 // Log data after
-                richTextBox7.AppendText("End recalculate   ID:" + MonthReadingID +
+                SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID +
                                         "- MeterID:" + MeterID +
                                         "- ActivityID:" + ActivityID +
                                         "- Year:" + Year +
                                         "- Month:" + Month +
                                         "- PhaseNo:" + sewage +
-                                        "- GuCode:" + meterUnits + System.Environment.NewLine);
+                                        "- GuCode:" + meterUnits + System.Environment.NewLine, true);
+                SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
 
                 // Update month reading
                 UpdateDbMonthReadingDetails(MonthReadingID, sewage, meterUnits, ActivityID);
@@ -939,11 +1014,13 @@ namespace MonthReadingRecalculation
 
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
         }
+
+        #endregion
 
     }
 }
