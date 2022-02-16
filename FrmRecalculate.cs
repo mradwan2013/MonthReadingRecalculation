@@ -843,20 +843,14 @@ namespace MonthReadingRecalculation
                             {
                                 try
                                 {
-                                    UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
-                                        monthReadingList.Rows[i]["MeterID"].ToString(),
-                                        int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
-                                        int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
-                                        monthReadingList.Rows[i]["ActivityID"].ToString(),
-                                        int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
-                                        int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()));
+                                    UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()));
                                 }
                                 catch
                                 {
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
 
                         }
@@ -897,82 +891,16 @@ namespace MonthReadingRecalculation
         /// <param name="meterUnits">meterUnits</param> 
         /// <param name="MeterVersionType">MeterVersionType</param> 
         /// <returns>Add result</returns>
-        public bool UpdateWaterMonthReadings(int MonthReadingID, string MeterID, int Year, int Month, string ActivityID, int sewage, int meterUnits)
+        public bool UpdateWaterMonthReadings(int MonthReadingID)
         {
             try
             {
-                decimal TotalPrice = 0;
-                decimal ServiceBoxWithTax = 0;
-                decimal WaterPrice = 0;
-                decimal SewagePrice = 0;
-
-                // Check meter change requests by date (any changes in: activity, department , gucode, phase no)
-                var monthDate = new System.DateTime(Year, Month, 1);
-                var meterDate = GetMeterChangesByDate(MeterID, monthDate);
-
-                try
-                {
-                    // get new activity instead of meter current activity
-                    if (meterDate != null && meterDate.Rows.Count > 0)
-                    {
-                        ActivityID = meterDate.Rows[0]["ActivityId"].ToString();
-                        meterUnits = int.Parse(meterDate.Rows[0]["GuCode"].ToString());
-                        sewage = int.Parse(meterDate.Rows[0]["PhaseNo"].ToString());
-                    }
-                    else
-                    {
-                        // medter audit
-                        var wMeterReading = GetLastWaterMeterReadingDetails(MeterID, monthDate);
-
-                        if (wMeterReading != null && wMeterReading.Rows.Count > 0)
-                        {
-                            ActivityID = wMeterReading.Rows[0]["ActivityId"].ToString();
-                            meterUnits = int.Parse(wMeterReading.Rows[0]["GuCode"].ToString());
-                            sewage = int.Parse(wMeterReading.Rows[0]["Sewage"].ToString());
-                        }
-                        else
-                        {
-                            var wMeterReading_2 = GetLatestWaterMeterReadingDetails(MeterID, monthDate);
-
-                            if (wMeterReading_2 != null && wMeterReading_2.Rows.Count > 0)
-                            {
-                                ActivityID = wMeterReading_2.Rows[0]["ActivityId"].ToString();
-                                meterUnits = int.Parse(wMeterReading_2.Rows[0]["GuCode"].ToString());
-                                sewage = int.Parse(wMeterReading_2.Rows[0]["Sewage"].ToString());
-                            }
-                            else
-                            {
-                                var mtrDetails = GetMeterDetails(MeterID);
-
-                                if (mtrDetails != null && mtrDetails.Rows.Count > 0)
-                                {
-                                    ActivityID = mtrDetails.Rows[0]["ActivityId"].ToString();
-                                    meterUnits = int.Parse(mtrDetails.Rows[0]["GuCode"].ToString());
-                                    sewage = int.Parse(mtrDetails.Rows[0]["PhaseNo"].ToString());
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    // Log data after
-                    SetUpdateDataResultTxt("Failed MeterID:" + MeterID + System.Environment.NewLine, true);
-                    SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
-                }
+                // Update month reading
+                var result = UpdateDbMonthReadingDetails(MonthReadingID);
 
                 // Log data after
-                SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID +
-                                        "- MeterID:" + MeterID +
-                                        "- ActivityID:" + ActivityID +
-                                        "- Year:" + Year +
-                                        "- Month:" + Month +
-                                        "- PhaseNo:" + sewage +
-                                        "- GuCode:" + meterUnits + System.Environment.NewLine, true);
+                SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID + "- Result:" + result + System.Environment.NewLine, true);
                 SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
-
-                // Update month reading
-                UpdateDbMonthReadingDetails(MonthReadingID, sewage, meterUnits, ActivityID);
 
                 return true;
             }
@@ -985,29 +913,23 @@ namespace MonthReadingRecalculation
         /// <summary>
         /// Update month readings details
         /// </summary>
-        /// <param name="ID">Identifier</param>
-        /// <param name="PhaseNo">PhaseNo</param>
-        /// <param name="GuCode">GuCode</param> 
-        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="ID">Month reading identifier</param>
         /// <returns>Bool indicator saved or not</returns>
-        public bool UpdateDbMonthReadingDetails(int ID, int PhaseNo, int GuCode, string ActivityID)
+        public bool UpdateDbMonthReadingDetails(int ID)
         {
             try
             {
                 dboperation db = new dboperation(connectionString);
                 db.objcmd.Parameters.Clear();
                 db.objcmd.CommandType = CommandType.StoredProcedure;
-                db.objcmd.CommandText = "UpdateMonthReadingsDetails";
-                db.objcmd.Parameters.AddWithValue("@ID", ID);
-                db.objcmd.Parameters.AddWithValue("@PhaseNo", PhaseNo);
-                db.objcmd.Parameters.AddWithValue("@GuCode", GuCode);
-                db.objcmd.Parameters.AddWithValue("@ActivityID", ActivityID);
-                SqlParameter sqlResult = new SqlParameter("@sqlResult", SqlDbType.Int, 1);
+                db.objcmd.CommandText = "UpdateMonthReadingData";
+                db.objcmd.Parameters.AddWithValue("@MonthReadingId", ID);
+                SqlParameter sqlResult = new SqlParameter("@ReturnVal", SqlDbType.Bit, 1);
                 sqlResult.Direction = ParameterDirection.Output;
                 db.objcmd.Parameters.Add(sqlResult);
                 db.ExecuteNonQuery("");
 
-                if (sqlResult.Value != null && (int)sqlResult.Value == 2) // Add month reading
+                if (sqlResult.Value != null && (bool)sqlResult.Value == true) // Add month reading
                 {
                     return true;
                 }
