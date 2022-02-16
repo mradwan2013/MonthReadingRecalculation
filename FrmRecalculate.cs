@@ -260,6 +260,215 @@ namespace MonthReadingRecalculation
             return true;
         }
 
+        /// <summary>
+        /// Get last tarrif or last tarrif before specific date
+        /// </summary>
+        /// <param name="ActivityID">Activity identifier</param>
+        /// <param name="tarrifDate">Specific tarrif date</param>
+        /// <returns>Tarriff details</returns>
+        public DataTable GetTariff(string ActivityID, DateTime? tarrifDate = null)
+        {
+            try
+            {
+                string sql = " SELECT ActivityID , StairID , StairTo , StairValue , Activities.alarmamt, Activities.dreditamt ,Activities.Name, InitialFees  ,SwgPercent,SwgPrice,PerMeterFees, (select top 1 tax from Settings) as tax , " +
+                             " CustomersServiceFees,IsCumulative,IsNoOfUnitsIncludedInCalc  , convert( datetime ,  StartDate , 103 ) as StartDate , StepSwgPrice,IsStepSwgPrice, " +
+                             " MinimumFee, MaximumFee, Activities.CurrencyRatio  ,  StairID AS [From],StairTo AS [To], StairValue AS Value,MonthFeesOptionId,MonthStepFees, " +
+                             " Activities.Stair , Healthy , PerMeterFees as ServiceBox  , isnull( exceptionvalue , 0 ) as exceptionvalue  " +
+                             " FROM TariffDetails  inner join Activities on Activities.ID  = TariffDetails.ActivityID   " +
+                             " WHERE (TariffDetails.StartDate = (SELECT MAX(CONVERT(datetime, tt.startdate, 101)) " +
+                             " FROM tariffdetails tt WHERE ";
+
+                if (tarrifDate == null)
+                {
+                    // Get current tariff
+                    sql += "GetDate() >= CONVERT(datetime, tt.startdate, 101) AND ActivityID ='" + ActivityID + "' ";
+                }
+                else
+                {
+                    // Get tariff after specific date
+                    sql += "CONVERT(datetime, '" + tarrifDate.Value.ToString("yyyy-MM-dd") + "' , 101 )    >=  CONVERT(datetime, tt.startdate, 103) AND ActivityID ='" + ActivityID + "' ";
+                }
+
+                sql += " )) AND TariffDetails.ActivityID ='" + ActivityID + "'";
+                return new dboperation(connectionString).SelectData(sql);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get meter fixed fees by activity identifier (Fixed Estidama)
+        /// </summary>
+        /// <param name="meterID">Meter identifier</param>
+        /// <param name="activityID">Activity ididentifierparam>
+        /// <param name="UnitNo">Unit no</param>
+        /// <returns>Meter fixed fee values</returns>
+        public decimal GetMeterEstidamaByActivityID(string meterID, string activityID, int UnitNo, DateTime tarriffDate, decimal quantity)
+        {
+            try
+            {
+                var query = "select [dbo].[GetActivityFixedFeeWithConsumption] ('" + meterID + "','" + activityID + "','" + UnitNo + "','" + tarriffDate.ToString("yyyy-MM-dd") + "'," + quantity + ")"; // GetMeterFixedFee
+                return Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Calculate tariff stairs details
+        /// </summary>
+        /// <param name="Quantity">Quantity</param>
+        /// <param name="dataTariff">Tarriff</param>
+        /// <param name="unitno">Unit number</param>
+        /// <param name="sewage">sewage</param>
+        /// <returns>Stairs details</returns>
+        public decimal[,] calcTariffStairsDetails(decimal Quantity, DataTable dataTariff, int unitno, int sewage)
+        {
+            bool IncludeUnitNo, IsCumulative, IsStepSwgPrice = false;
+            decimal estidamaPerStair, from, to, Price, Tax, ServiceBox, ServiceBoxWithTax, SewagePrice, SewagePercentage, totalSewage, StepSwgPrice, waterPrice, totalPrice = 0;
+            decimal allQuantity = Quantity;
+            decimal[,] stair = new decimal[dataTariff.Rows.Count, 8];
+
+            for (int i = 0; i < dataTariff.Rows.Count; i++)
+            {
+                // 1- Prepare water price per units
+                IncludeUnitNo = Convert.ToBoolean(dataTariff.Rows[i]["IsNoOfUnitsIncludedInCalc"].ToString());
+
+                from = Convert.ToDecimal(dataTariff.Rows[i]["from"].ToString());
+                to = Convert.ToDecimal(dataTariff.Rows[i]["to"].ToString());
+                estidamaPerStair = Convert.ToDecimal(dataTariff.Rows[i]["MonthStepFees"].ToString());
+
+                if (IncludeUnitNo)
+                {
+                    from = from * unitno;
+                    to = to * unitno;
+                }
+
+                Price = Convert.ToDecimal(dataTariff.Rows[i]["value"].ToString());
+
+                // 2- Prepare service box
+                Tax = decimal.Parse(dataTariff.Rows[i]["tax"].ToString()) / 100;
+                ServiceBox = decimal.Parse(dataTariff.Rows[i]["ServiceBox"].ToString()) + decimal.Parse(dataTariff.Rows[i]["CustomersServiceFees"].ToString());
+                ServiceBoxWithTax = ServiceBox * (1 + Tax);
+
+                // 3- Prepare sewage price
+                if (sewage == 1)
+                {
+                    SewagePrice = Convert.ToDecimal(dataTariff.Rows[i]["SwgPrice"].ToString());
+                    SewagePercentage = Convert.ToDecimal(dataTariff.Rows[i]["SwgPercent"].ToString());
+                    IsStepSwgPrice = Convert.ToBoolean(dataTariff.Rows[i]["IsStepSwgPrice"].ToString());
+                    StepSwgPrice = Convert.ToDecimal(dataTariff.Rows[i]["StepSwgPrice"].ToString());
+                    totalSewage = SewagePrice > 0 ? (SewagePercentage * SewagePrice / 100) : (SewagePercentage * Price / 100);
+                }
+                else
+                {
+                    totalSewage = 0;
+                }
+
+                // 4- Prepare stair price
+                waterPrice = Price + ServiceBoxWithTax + totalSewage;
+
+                // 5- Prepare cumulative
+                IsCumulative = Convert.ToBoolean(dataTariff.Rows[i]["IsCumulative"].ToString());
+
+                if (from == 0 && !IsCumulative)
+                {
+                    from = 0;
+                    totalPrice = 0;
+                    Quantity = allQuantity;
+
+                    for (int j = 0; j < i; j++)
+                    {
+                        stair[j, 0] = 0; // Quantity الكمية
+                        stair[j, 1] = 0; // Total water price إجمالى ثمن المياه
+                        stair[j, 2] = 0; // Total service box with tax إجمالى ثمن الخدمات شامل الضريبة
+                        stair[j, 3] = 0; // Total service box إجمالى ثمن الخدمات 
+                        stair[j, 4] = 0; // Total tax إجمالى الضريبة
+                        stair[j, 5] = 0; // Total sewage إجمالى ثمن الصرف
+                        stair[j, 6] = 0; // Total price إجمالى الثمن الكلى
+                        stair[j, 7] = 0; // Estidama استدامة الشريحة
+                    }
+                }
+
+                // Calculate stairs main prices
+                if (Quantity > to - from)
+                {
+                    totalPrice += (to - from) * waterPrice;
+                    Quantity = Quantity - (to - from);
+                    stair[i, 0] = to - from;
+                    stair[i, 1] = (to - from) * Price;
+                    stair[i, 2] = (to - from) * ServiceBoxWithTax;
+                    stair[i, 3] = stair[i, 2] / (1 + Tax);
+                    stair[i, 4] = stair[i, 3] * Tax;
+                    stair[i, 5] = (to - from) * totalSewage;
+                    stair[i, 6] = totalPrice;
+                    stair[i, 7] = estidamaPerStair;
+                }
+                else
+                {
+                    totalPrice += Quantity * waterPrice;
+                    stair[i, 0] = Quantity;
+                    stair[i, 1] = Quantity * Price;
+                    stair[i, 2] = Quantity * ServiceBoxWithTax;
+                    stair[i, 3] = stair[i, 2] / (1 + Tax);
+                    stair[i, 4] = stair[i, 3] * Tax;
+                    stair[i, 5] = Quantity * totalSewage;
+                    stair[i, 6] = totalPrice;
+                    stair[i, 7] = estidamaPerStair;
+                    break;
+                }
+            }
+
+            return stair;
+        }
+
+        /// <summary>
+        /// Update month readings to db directly
+        /// </summary>
+        /// <param name="ID">Identifier</param>
+        /// <param name="TotalPrice">Total price</param>
+        /// <param name="WaterPrice">Water price</param> 
+        /// <param name="SewagePrice">Sewage price</param>
+        /// <param name="ServiceBox">Service box</param>
+        /// <returns>Bool indicator saved or not</returns>
+        public bool UpdateDbMonthReadings(int ID, decimal TotalPrice, decimal WaterPrice, decimal SewagePrice, decimal ServiceBox, decimal FixFee, decimal MeterFixFee)
+        {
+            try
+            {
+                dboperation db = new dboperation(connectionString);
+                db.objcmd.Parameters.Clear();
+                db.objcmd.CommandType = CommandType.StoredProcedure;
+                db.objcmd.CommandText = "UpdateMonthReadings";
+                db.objcmd.Parameters.AddWithValue("@ID", ID);                                   // Identifier
+                db.objcmd.Parameters.AddWithValue("@UsedMonthly", (TotalPrice + FixFee));       // consumption money from meter 
+                db.objcmd.Parameters.AddWithValue("@CBMPrice", WaterPrice);                     // Calculated water price
+                db.objcmd.Parameters.AddWithValue("@Healthy", SewagePrice);                     // Calculated sewage price
+                db.objcmd.Parameters.AddWithValue("@ServiceBox", ServiceBox);                   // Calculated service box
+                db.objcmd.Parameters.AddWithValue("@FixFee", FixFee);                           // Calculated fix fee
+                db.objcmd.Parameters.AddWithValue("@MeterFixFee", MeterFixFee);                 // Meter fix fee
+                db.objcmd.Parameters.AddWithValue("@ConsumptionMoney", (TotalPrice + FixFee));  // Calculated money from system    
+                SqlParameter sqlResult = new SqlParameter("@sqlResult", SqlDbType.Int, 1);
+                sqlResult.Direction = ParameterDirection.Output;
+                db.objcmd.Parameters.Add(sqlResult);
+                db.ExecuteNonQuery("");
+
+                if (sqlResult.Value != null && (int)sqlResult.Value == 1) // Add month reading
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #region Update month readings data
@@ -712,233 +921,6 @@ namespace MonthReadingRecalculation
             catch
             {
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// Get first water meter reading after specific date
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        /// <param name="SpecificDate">Specific date</param>
-        public DataTable GetLatestWaterMeterReadingDetails(string meterID, DateTime SpecificDate)
-        {
-            try
-            {
-                string sql = " select top 1 ActivityID , GuCode , Sewage from [dbo].[WaterMetersReadings] where [MeterId] = '" + meterID + "' and CONVERT(datetime, serverDate, 101)  > CONVERT(datetime, '" + SpecificDate.AddMonths(1).ToString("yyyy-MM-dd") + "' , 101 ) order by serverDate";
-                return new dboperation(connectionString).SelectData(sql);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Get last tarrif or last tarrif before specific date
-        /// </summary>
-        /// <param name="ActivityID">Activity identifier</param>
-        /// <param name="tarrifDate">Specific tarrif date</param>
-        /// <returns>Tarriff details</returns>
-        public DataTable GetTariff(string ActivityID, DateTime? tarrifDate = null)
-        {
-            try
-            {
-                string sql = " SELECT ActivityID , StairID , StairTo , StairValue , Activities.alarmamt, Activities.dreditamt ,Activities.Name, InitialFees  ,SwgPercent,SwgPrice,PerMeterFees, (select top 1 tax from Settings) as tax , " +
-                             " CustomersServiceFees,IsCumulative,IsNoOfUnitsIncludedInCalc  , convert( datetime ,  StartDate , 103 ) as StartDate , StepSwgPrice,IsStepSwgPrice, " +
-                             " MinimumFee, MaximumFee, Activities.CurrencyRatio  ,  StairID AS [From],StairTo AS [To], StairValue AS Value,MonthFeesOptionId,MonthStepFees, " +
-                             " Activities.Stair , Healthy , PerMeterFees as ServiceBox  , isnull( exceptionvalue , 0 ) as exceptionvalue  " +
-                             " FROM TariffDetails  inner join Activities on Activities.ID  = TariffDetails.ActivityID   " +
-                             " WHERE (TariffDetails.StartDate = (SELECT MAX(CONVERT(datetime, tt.startdate, 101)) " +
-                             " FROM tariffdetails tt WHERE ";
-
-                if (tarrifDate == null)
-                {
-                    // Get current tariff
-                    sql += "GetDate() >= CONVERT(datetime, tt.startdate, 101) AND ActivityID ='" + ActivityID + "' ";
-                }
-                else
-                {
-                    // Get tariff after specific date
-                    sql += "CONVERT(datetime, '" + tarrifDate.Value.ToString("yyyy-MM-dd") + "' , 101 )    >=  CONVERT(datetime, tt.startdate, 103) AND ActivityID ='" + ActivityID + "' ";
-                }
-
-                sql += " )) AND TariffDetails.ActivityID ='" + ActivityID + "'";
-                return new dboperation(connectionString).SelectData(sql);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Get meter fixed fees by activity identifier (Fixed Estidama)
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        /// <param name="activityID">Activity ididentifierparam>
-        /// <param name="UnitNo">Unit no</param>
-        /// <returns>Meter fixed fee values</returns>
-        public decimal GetMeterEstidamaByActivityID(string meterID, string activityID, int UnitNo, DateTime tarriffDate, decimal quantity)
-        {
-            try
-            {
-                var query = "select [dbo].[GetActivityFixedFeeWithConsumption] ('" + meterID + "','" + activityID + "','" + UnitNo + "','" + tarriffDate.ToString("yyyy-MM-dd") + "'," + quantity + ")"; // GetMeterFixedFee
-                return Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
-            }
-            catch
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Calculate tariff stairs details
-        /// </summary>
-        /// <param name="Quantity">Quantity</param>
-        /// <param name="dataTariff">Tarriff</param>
-        /// <param name="unitno">Unit number</param>
-        /// <param name="sewage">sewage</param>
-        /// <returns>Stairs details</returns>
-        public decimal[,] calcTariffStairsDetails(decimal Quantity, DataTable dataTariff, int unitno, int sewage)
-        {
-            bool IncludeUnitNo, IsCumulative, IsStepSwgPrice = false;
-            decimal estidamaPerStair, from, to, Price, Tax, ServiceBox, ServiceBoxWithTax, SewagePrice, SewagePercentage, totalSewage, StepSwgPrice, waterPrice, totalPrice = 0;
-            decimal allQuantity = Quantity;
-            decimal[,] stair = new decimal[dataTariff.Rows.Count, 8];
-
-            for (int i = 0; i < dataTariff.Rows.Count; i++)
-            {
-                // 1- Prepare water price per units
-                IncludeUnitNo = Convert.ToBoolean(dataTariff.Rows[i]["IsNoOfUnitsIncludedInCalc"].ToString());
-
-                from = Convert.ToDecimal(dataTariff.Rows[i]["from"].ToString());
-                to = Convert.ToDecimal(dataTariff.Rows[i]["to"].ToString());
-                estidamaPerStair = Convert.ToDecimal(dataTariff.Rows[i]["MonthStepFees"].ToString());
-
-                if (IncludeUnitNo)
-                {
-                    from = from * unitno;
-                    to = to * unitno;
-                }
-
-                Price = Convert.ToDecimal(dataTariff.Rows[i]["value"].ToString());
-
-                // 2- Prepare service box
-                Tax = decimal.Parse(dataTariff.Rows[i]["tax"].ToString()) / 100;
-                ServiceBox = decimal.Parse(dataTariff.Rows[i]["ServiceBox"].ToString()) + decimal.Parse(dataTariff.Rows[i]["CustomersServiceFees"].ToString());
-                ServiceBoxWithTax = ServiceBox * (1 + Tax);
-
-                // 3- Prepare sewage price
-                if (sewage == 1)
-                {
-                    SewagePrice = Convert.ToDecimal(dataTariff.Rows[i]["SwgPrice"].ToString());
-                    SewagePercentage = Convert.ToDecimal(dataTariff.Rows[i]["SwgPercent"].ToString());
-                    IsStepSwgPrice = Convert.ToBoolean(dataTariff.Rows[i]["IsStepSwgPrice"].ToString());
-                    StepSwgPrice = Convert.ToDecimal(dataTariff.Rows[i]["StepSwgPrice"].ToString());
-                    totalSewage = SewagePrice > 0 ? (SewagePercentage * SewagePrice / 100) : (SewagePercentage * Price / 100);
-                }
-                else
-                {
-                    totalSewage = 0;
-                }
-
-                // 4- Prepare stair price
-                waterPrice = Price + ServiceBoxWithTax + totalSewage;
-
-                // 5- Prepare cumulative
-                IsCumulative = Convert.ToBoolean(dataTariff.Rows[i]["IsCumulative"].ToString());
-
-                if (from == 0 && !IsCumulative)
-                {
-                    from = 0;
-                    totalPrice = 0;
-                    Quantity = allQuantity;
-
-                    for (int j = 0; j < i; j++)
-                    {
-                        stair[j, 0] = 0; // Quantity الكمية
-                        stair[j, 1] = 0; // Total water price إجمالى ثمن المياه
-                        stair[j, 2] = 0; // Total service box with tax إجمالى ثمن الخدمات شامل الضريبة
-                        stair[j, 3] = 0; // Total service box إجمالى ثمن الخدمات 
-                        stair[j, 4] = 0; // Total tax إجمالى الضريبة
-                        stair[j, 5] = 0; // Total sewage إجمالى ثمن الصرف
-                        stair[j, 6] = 0; // Total price إجمالى الثمن الكلى
-                        stair[j, 7] = 0; // Estidama استدامة الشريحة
-                    }
-                }
-
-                // Calculate stairs main prices
-                if (Quantity > to - from)
-                {
-                    totalPrice += (to - from) * waterPrice;
-                    Quantity = Quantity - (to - from);
-                    stair[i, 0] = to - from;
-                    stair[i, 1] = (to - from) * Price;
-                    stair[i, 2] = (to - from) * ServiceBoxWithTax;
-                    stair[i, 3] = stair[i, 2] / (1 + Tax);
-                    stair[i, 4] = stair[i, 3] * Tax;
-                    stair[i, 5] = (to - from) * totalSewage;
-                    stair[i, 6] = totalPrice;
-                    stair[i, 7] = estidamaPerStair;
-                }
-                else
-                {
-                    totalPrice += Quantity * waterPrice;
-                    stair[i, 0] = Quantity;
-                    stair[i, 1] = Quantity * Price;
-                    stair[i, 2] = Quantity * ServiceBoxWithTax;
-                    stair[i, 3] = stair[i, 2] / (1 + Tax);
-                    stair[i, 4] = stair[i, 3] * Tax;
-                    stair[i, 5] = Quantity * totalSewage;
-                    stair[i, 6] = totalPrice;
-                    stair[i, 7] = estidamaPerStair;
-                    break;
-                }
-            }
-
-            return stair;
-        }
-
-        /// <summary>
-        /// Update month readings to db directly
-        /// </summary>
-        /// <param name="ID">Identifier</param>
-        /// <param name="TotalPrice">Total price</param>
-        /// <param name="WaterPrice">Water price</param> 
-        /// <param name="SewagePrice">Sewage price</param>
-        /// <param name="ServiceBox">Service box</param>
-        /// <returns>Bool indicator saved or not</returns>
-        public bool UpdateDbMonthReadings(int ID, decimal TotalPrice, decimal WaterPrice, decimal SewagePrice, decimal ServiceBox, decimal FixFee, decimal MeterFixFee)
-        {
-            try
-            {
-                dboperation db = new dboperation(connectionString);
-                db.objcmd.Parameters.Clear();
-                db.objcmd.CommandType = CommandType.StoredProcedure;
-                db.objcmd.CommandText = "UpdateMonthReadings";
-                db.objcmd.Parameters.AddWithValue("@ID", ID);                                   // Identifier
-                db.objcmd.Parameters.AddWithValue("@UsedMonthly", (TotalPrice + FixFee));       // consumption money from meter 
-                db.objcmd.Parameters.AddWithValue("@CBMPrice", WaterPrice);                     // Calculated water price
-                db.objcmd.Parameters.AddWithValue("@Healthy", SewagePrice);                     // Calculated sewage price
-                db.objcmd.Parameters.AddWithValue("@ServiceBox", ServiceBox);                   // Calculated service box
-                db.objcmd.Parameters.AddWithValue("@FixFee", FixFee);                           // Calculated fix fee
-                db.objcmd.Parameters.AddWithValue("@MeterFixFee", MeterFixFee);                 // Meter fix fee
-                db.objcmd.Parameters.AddWithValue("@ConsumptionMoney", (TotalPrice + FixFee));  // Calculated money from system    
-                SqlParameter sqlResult = new SqlParameter("@sqlResult", SqlDbType.Int, 1);
-                sqlResult.Direction = ParameterDirection.Output;
-                db.objcmd.Parameters.Add(sqlResult);
-                db.ExecuteNonQuery("");
-
-                if (sqlResult.Value != null && (int)sqlResult.Value == 1) // Add month reading
-                {
-                    return true;
-                }
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                return false;
             }
         }
 
