@@ -60,6 +60,8 @@ namespace MonthReadingRecalculation
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.CancelProgressBar = new System.Windows.Forms.ProgressBar();
+            this.CancelProgressLbl = new System.Windows.Forms.Label();
             this.tabPage4.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage5.SuspendLayout();
@@ -70,6 +72,8 @@ namespace MonthReadingRecalculation
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.CancelProgressLbl);
+            this.tabPage4.Controls.Add(this.CancelProgressBar);
             this.tabPage4.Controls.Add(this.CancelBtn);
             this.tabPage4.Controls.Add(this.CancelChargesQueryTxt);
             this.tabPage4.Controls.Add(this.CancelChargesResultTxt);
@@ -83,7 +87,7 @@ namespace MonthReadingRecalculation
             // 
             // CancelBtn
             // 
-            this.CancelBtn.Location = new System.Drawing.Point(359, 135);
+            this.CancelBtn.Location = new System.Drawing.Point(90, 140);
             this.CancelBtn.Name = "CancelBtn";
             this.CancelBtn.Size = new System.Drawing.Size(93, 30);
             this.CancelBtn.TabIndex = 22;
@@ -223,9 +227,8 @@ namespace MonthReadingRecalculation
             this.UpdateProgressLbl.AutoSize = true;
             this.UpdateProgressLbl.Location = new System.Drawing.Point(456, 152);
             this.UpdateProgressLbl.Name = "UpdateProgressLbl";
-            this.UpdateProgressLbl.Size = new System.Drawing.Size(56, 17);
+            this.UpdateProgressLbl.Size = new System.Drawing.Size(0, 17);
             this.UpdateProgressLbl.TabIndex = 25;
-            this.UpdateProgressLbl.Text = "counter";
             // 
             // UpdateDataResultTxt
             // 
@@ -366,6 +369,21 @@ namespace MonthReadingRecalculation
             this.tabControl1.Size = new System.Drawing.Size(846, 509);
             this.tabControl1.TabIndex = 18;
             // 
+            // CancelProgressBar
+            // 
+            this.CancelProgressBar.Location = new System.Drawing.Point(208, 142);
+            this.CancelProgressBar.Name = "CancelProgressBar";
+            this.CancelProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.CancelProgressBar.TabIndex = 26;
+            // 
+            // CancelProgressLbl
+            // 
+            this.CancelProgressLbl.AutoSize = true;
+            this.CancelProgressLbl.Location = new System.Drawing.Point(463, 143);
+            this.CancelProgressLbl.Name = "CancelProgressLbl";
+            this.CancelProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.CancelProgressLbl.TabIndex = 27;
+            // 
             // FrmRecalculate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -376,6 +394,7 @@ namespace MonthReadingRecalculation
             this.Name = "FrmRecalculate";
             this.Text = "Recalcualte Month Readings";
             this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.tabPage5.ResumeLayout(false);
@@ -421,5 +440,7 @@ namespace MonthReadingRecalculation
         public System.Windows.Forms.RichTextBox UpdateQueryTxt;
         public System.Windows.Forms.RichTextBox CancelChargesQueryTxt;
         private System.Windows.Forms.ProgressBar UpdateProgressBar;
+        private System.Windows.Forms.Label CancelProgressLbl;
+        private System.Windows.Forms.ProgressBar CancelProgressBar;
     }
 }
