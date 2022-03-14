@@ -77,7 +77,7 @@ namespace MonthReadingRecalculation
                 RecalcProgressBar.Value = 0;
                 RecalcProgressBar.Step = 1;
                 RecalcProgressBar.Maximum = monthReadingList.Rows.Count;
-                RecalcProgressLbl.Text = string.Format("{0} records Completed", RecalcProgressBar.Value);
+                RecalcProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcProgressBar.Value, RecalcProgressBar.Maximum);
 
                 worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
@@ -90,22 +90,22 @@ namespace MonthReadingRecalculation
                             worker.ReportProgress(t);
 
                             // Log data before 
-                            SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
-                            SetRecalculateResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
-                                                    "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
-                                                    "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
-                                                    "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
-                                                    "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
-                                                    "- Read:" + monthReadingList.Rows[t]["Read"].ToString() +
-                                                    "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
-                                                    "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() +
-                                                    "- ConsumptionMoney:" + monthReadingList.Rows[t]["ConsumptionMoney"].ToString() +
-                                                    "- CBMPrice:" + monthReadingList.Rows[t]["CBMPrice"].ToString() +
-                                                    "- Healthy:" + monthReadingList.Rows[t]["Healthy"].ToString() +
-                                                    "- ServiceBox:" + monthReadingList.Rows[t]["ServiceBox"].ToString() +
-                                                    "- FixFee:" + monthReadingList.Rows[t]["FixFee"].ToString() +
-                                                    "- MeterFixFee:" + monthReadingList.Rows[t]["MeterFixFee"].ToString() + System.Environment.NewLine
-                                , true);
+                            //SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetRecalculateResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                            //                        "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                            //                        "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                        "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                            //                        "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                            //                        "- Read:" + monthReadingList.Rows[t]["Read"].ToString() +
+                            //                        "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                        "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() +
+                            //                        "- ConsumptionMoney:" + monthReadingList.Rows[t]["ConsumptionMoney"].ToString() +
+                            //                        "- CBMPrice:" + monthReadingList.Rows[t]["CBMPrice"].ToString() +
+                            //                        "- Healthy:" + monthReadingList.Rows[t]["Healthy"].ToString() +
+                            //                        "- ServiceBox:" + monthReadingList.Rows[t]["ServiceBox"].ToString() +
+                            //                        "- FixFee:" + monthReadingList.Rows[t]["FixFee"].ToString() +
+                            //                        "- MeterFixFee:" + monthReadingList.Rows[t]["MeterFixFee"].ToString() + System.Environment.NewLine
+                            //    , true);
 
                             if (i < monthReadingList.Rows.Count)
                             {
@@ -145,7 +145,7 @@ namespace MonthReadingRecalculation
                 delegate (object o, ProgressChangedEventArgs args)
                 {
                     RecalcProgressBar.PerformStep();
-                    RecalcProgressLbl.Text = string.Format("{0} records Completed", RecalcProgressBar.Value);
+                    RecalcProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcProgressBar.Value, RecalcProgressBar.Maximum);
                 });
 
                 // Handle complete
@@ -226,23 +226,23 @@ namespace MonthReadingRecalculation
                 // Log data after
                 if (res)
                 {
-                    SetRecalculateResultTxt(
-                                        "End recalculate   ID:" + MonthReadingID +
-                                        "- MeterID:" + MeterID +
-                                        "- ActivityID:" + ActivityID +
-                                        "- Year:" + Year +
-                                        "- Month:" + Month +
-                                        "- Read:" + TotalReading +
-                                        "- PhaseNo:" + sewage +
-                                        "- GuCode:" + meterUnits +
-                                        "- ConsumptionMoney:" + TotalPrice.ToString("F3") +
-                                        "- CBMPrice:" + WaterPrice.ToString("F3") +
-                                        "- Healthy:" + SewagePrice.ToString("F3") +
-                                        "- ServiceBox:" + ServiceBoxWithTax.ToString("F3") +
-                                        "- FixFee:" + FixFee +
-                                        "- MeterFixFee:" + MeterFixFee +
-                                        System.Environment.NewLine, true);
-                    SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                    //SetRecalculateResultTxt(
+                    //                    "End recalculate   ID:" + MonthReadingID +
+                    //                    "- MeterID:" + MeterID +
+                    //                    "- ActivityID:" + ActivityID +
+                    //                    "- Year:" + Year +
+                    //                    "- Month:" + Month +
+                    //                    "- Read:" + TotalReading +
+                    //                    "- PhaseNo:" + sewage +
+                    //                    "- GuCode:" + meterUnits +
+                    //                    "- ConsumptionMoney:" + TotalPrice.ToString("F3") +
+                    //                    "- CBMPrice:" + WaterPrice.ToString("F3") +
+                    //                    "- Healthy:" + SewagePrice.ToString("F3") +
+                    //                    "- ServiceBox:" + ServiceBoxWithTax.ToString("F3") +
+                    //                    "- FixFee:" + FixFee +
+                    //                    "- MeterFixFee:" + MeterFixFee +
+                    //                    System.Environment.NewLine, true);
+                    //SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
 
                 }
                 else
@@ -524,7 +524,7 @@ namespace MonthReadingRecalculation
                 UpdateProgressBar.Value = 0;
                 UpdateProgressBar.Step = 1;
                 UpdateProgressBar.Maximum = monthReadingList.Rows.Count;
-                UpdateProgressLbl.Text = string.Format("{0} records Completed", UpdateProgressBar.Value);
+                UpdateProgressLbl.Text = string.Format("{0} records Completed from {1}", UpdateProgressBar.Value, UpdateProgressBar.Maximum);
 
                 worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
@@ -537,15 +537,15 @@ namespace MonthReadingRecalculation
                             worker.ReportProgress(t);
 
                             // Log data before 
-                            SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
-                            SetUpdateDataResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
-                                                "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
-                                                "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
-                                                "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
-                                                "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
-                                                "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
-                                                "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
-                                , true);
+                            //SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetUpdateDataResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                            //                    "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                            //                    "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                    "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                            //                    "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                            //                    "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                    "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
+                            //    , true);
 
                             if (i < monthReadingList.Rows.Count)
                             {
@@ -570,7 +570,7 @@ namespace MonthReadingRecalculation
                 delegate (object o, ProgressChangedEventArgs args)
                 {
                     UpdateProgressBar.PerformStep();
-                    UpdateProgressLbl.Text = string.Format("{0} records Completed", UpdateProgressBar.Value);
+                    UpdateProgressLbl.Text = string.Format("{0} records Completed from {1}", UpdateProgressBar.Value, UpdateProgressBar.Maximum);
                 });
 
                 // Handle complete
@@ -606,9 +606,9 @@ namespace MonthReadingRecalculation
                 // Update month reading
                 var result = UpdateDbMonthReadingDetails(MonthReadingID);
 
-                // Log data after
-                SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID + "- Result:" + result + System.Environment.NewLine, true);
-                SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                //// Log data after
+                //SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID + "- Result:" + result + System.Environment.NewLine, true);
+                //SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
 
                 return true;
             }
@@ -687,7 +687,7 @@ namespace MonthReadingRecalculation
 
             ConnectDB();
             CancelCharges(CancelChargesQueryTxt.Text);
-        }      
+        }
 
         /// <summary>
         /// Cancel charges based on table query
@@ -696,7 +696,7 @@ namespace MonthReadingRecalculation
         public void CancelCharges(string ChargesQuery)
         {
             DataTable chargesList = ExecuteSelectQuery(ChargesQuery);
-            
+
             if (chargesList != null && chargesList.Rows.Count > 0)
             {
                 CancelProgressLbl.Text = chargesList.Rows.Count.ToString();
@@ -705,7 +705,7 @@ namespace MonthReadingRecalculation
                 CancelProgressBar.Value = 0;
                 CancelProgressBar.Step = 1;
                 CancelProgressBar.Maximum = chargesList.Rows.Count;
-                CancelProgressLbl.Text = string.Format("{0} records Completed", CancelProgressBar.Value);
+                CancelProgressLbl.Text = string.Format("{0} records Completed from {1}", CancelProgressBar.Value, CancelProgressBar.Maximum);
 
                 worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
@@ -755,7 +755,7 @@ namespace MonthReadingRecalculation
                 delegate (object o, ProgressChangedEventArgs args)
                 {
                     CancelProgressBar.PerformStep();
-                    CancelProgressLbl.Text = string.Format("{0} records Completed", CancelProgressBar.Value);
+                    CancelProgressLbl.Text = string.Format("{0} records Completed  from {1}", CancelProgressBar.Value, CancelProgressBar.Maximum);
                 });
 
                 // Handle complete
@@ -903,7 +903,7 @@ namespace MonthReadingRecalculation
             StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
             Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
             Con.Append(";Initial Catalog=" + textBox2.Text);
-            Con.Append(";Data Source=" + textBox1.Text + ";");
+            Con.Append(";MultipleActiveResultSets=True;Max Pool Size=30000;Data Source=" + textBox1.Text + ";");
             this.connectionString = Con.ToString();
         }
 
@@ -921,6 +921,187 @@ namespace MonthReadingRecalculation
             catch
             {
                 return null;
+            }
+        }
+
+        #endregion
+
+        #region Update Read mass card readings
+
+        private void SetReviewCardResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.UpdateDataResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetReviewCardResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.ReviewCardResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.ReviewCardResultTxt.Text = text;
+                }
+            }
+        }
+
+        private void ReviewCardDataBtn_Click(object sender, EventArgs e)
+        {
+            ReviewCardProgressBar.Value = 0;
+            ReviewCardProgressBar.Step = 1;
+            ReviewCardProgressBar.Maximum = 0;
+            ReviewCardResultTxt.Text = "";
+            ReviewCardProgressLbl.Text = "";
+
+            ConnectDB();
+            ReviewCardMassCardReading(ReviewCardQueryTxt.Text);
+        }
+
+        /// <summary>
+        /// Update mass card readings based on table query
+        /// </summary>
+        /// <param name="MonthReadingQuery">Mass card reading query</param>
+        public void ReviewCardMassCardReading(string ReviewCardQuery)
+        {
+            DataTable cardReadingList = ExecuteSelectQuery(ReviewCardQuery);
+
+            if (cardReadingList != null && cardReadingList.Rows.Count > 0)
+            {
+                ReviewCardProgressLbl.Text = cardReadingList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                ReviewCardProgressBar.Maximum = cardReadingList.Rows.Count;
+                ReviewCardProgressLbl.Text = string.Format("{0} records Completed from {1}", ReviewCardProgressBar.Value, ReviewCardProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < cardReadingList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            // Log data before 
+                            //SetReviewCardResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetReviewCardResultTxt("Start recalculate ID:" + cardReadingList.Rows[t]["ID"].ToString() +
+                            //                    "- MeterID:" + cardReadingList.Rows[t]["MeterID"].ToString() +
+                            //                    "- ActivityID:" + cardReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                    "- Year:" + cardReadingList.Rows[t]["Year"].ToString() +
+                            //                    "- Month:" + cardReadingList.Rows[t]["Month"].ToString() +
+                            //                    "- PhaseNo:" + cardReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                    "- GuCode:" + cardReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
+                            //    , true);
+
+                            if (i < cardReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    UpdateReviewCardReadings(int.Parse(cardReadingList.Rows[i]["ID"].ToString()));
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    ReviewCardProgressBar.PerformStep();
+                    ReviewCardProgressLbl.Text = string.Format("{0} records Completed from {1}", ReviewCardProgressBar.Value, ReviewCardProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                ReviewCardProgressBar.Value = 0;
+                ReviewCardProgressBar.Step = 1;
+                ReviewCardProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update mass card readings
+        /// </summary>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="Year">Reading year</param>
+        /// <param name="Month">Reading month from meter</param>
+        /// <param name="TotalReading">Total consumption Reading from meter</param>
+        /// <param name="UsedMonthly">Used Consuption Money Monthly</param>
+        /// <param name="FixFee">Fixed Fee from meter</param>
+        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="sewage">sewage</param> 
+        /// <param name="meterUnits">meterUnits</param> 
+        /// <param name="MeterVersionType">MeterVersionType</param> 
+        /// <returns>Add result</returns>
+        public bool UpdateReviewCardReadings(int CardReadingID)
+        {
+            try
+            {
+                // Update read mass retrieval card reading
+                var result = UpdateReviewCardDetails(CardReadingID);
+
+                //// Log data after
+                //SetReviewCardResultTxt("End recalculate   ID:" + CardReadingID + "- Result:" + result + System.Environment.NewLine, true);
+                //SetReviewCardResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update mass card readings details
+        /// </summary>
+        /// <param name="ID">Mass reading identifier</param>
+        /// <returns>Bool indicator saved or not</returns>
+        public bool UpdateReviewCardDetails(int ID)
+        {
+            try
+            {
+                dboperation db = new dboperation(connectionString);
+                db.objcmd.Parameters.Clear();
+                db.objcmd.CommandType = CommandType.StoredProcedure;
+                db.objcmd.CommandText = "UpdateMassReadingData";
+                db.objcmd.Parameters.AddWithValue("@MassCardReadingId", ID);
+                SqlParameter sqlResult = new SqlParameter("@ReturnVal", SqlDbType.Bit, 1);
+                sqlResult.Direction = ParameterDirection.Output;
+                db.objcmd.Parameters.Add(sqlResult);
+                db.ExecuteNonQuery("");
+
+                if (sqlResult.Value != null && (bool)sqlResult.Value == true) // Add mass card reading
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
 
