@@ -62,20 +62,28 @@ namespace MonthReadingRecalculation
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.OtherOpTab = new System.Windows.Forms.TabPage();
+            this.UpdateReviewCardDate = new System.Windows.Forms.TabPage();
+            this.ReviewCardProgressLbl = new System.Windows.Forms.Label();
             this.ReviewCardProgressBar = new System.Windows.Forms.ProgressBar();
             this.ReviewCardResultTxt = new System.Windows.Forms.RichTextBox();
             this.ReviewCardQueryTxt = new System.Windows.Forms.RichTextBox();
             this.ReviewCardDataBtn = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
-            this.ReviewCardProgressLbl = new System.Windows.Forms.Label();
+            this.UpdateTarrifDifference = new System.Windows.Forms.TabPage();
+            this.TarrifDifferenceProgressBar = new System.Windows.Forms.ProgressBar();
+            this.TarrifDifferenceQueryTxt = new System.Windows.Forms.RichTextBox();
+            this.TarrifDifferenceBtn = new System.Windows.Forms.Button();
+            this.label9 = new System.Windows.Forms.Label();
+            this.TarrifDifferenceProgressLbl = new System.Windows.Forms.Label();
+            this.TarrifDifferenceResultTxt = new System.Windows.Forms.RichTextBox();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
             this.DBConnectionTab.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
-            this.OtherOpTab.SuspendLayout();
+            this.UpdateReviewCardDate.SuspendLayout();
+            this.UpdateTarrifDifference.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelChTab
@@ -386,27 +394,36 @@ namespace MonthReadingRecalculation
             this.tabControl1.Controls.Add(this.UpdateMrTab);
             this.tabControl1.Controls.Add(this.RecalcMrTab);
             this.tabControl1.Controls.Add(this.CancelChTab);
-            this.tabControl1.Controls.Add(this.OtherOpTab);
+            this.tabControl1.Controls.Add(this.UpdateReviewCardDate);
+            this.tabControl1.Controls.Add(this.UpdateTarrifDifference);
             this.tabControl1.Location = new System.Drawing.Point(21, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(846, 509);
             this.tabControl1.TabIndex = 18;
             // 
-            // OtherOpTab
+            // UpdateReviewCardDate
             // 
-            this.OtherOpTab.Controls.Add(this.ReviewCardProgressLbl);
-            this.OtherOpTab.Controls.Add(this.ReviewCardProgressBar);
-            this.OtherOpTab.Controls.Add(this.ReviewCardResultTxt);
-            this.OtherOpTab.Controls.Add(this.ReviewCardQueryTxt);
-            this.OtherOpTab.Controls.Add(this.ReviewCardDataBtn);
-            this.OtherOpTab.Controls.Add(this.label7);
-            this.OtherOpTab.Location = new System.Drawing.Point(4, 25);
-            this.OtherOpTab.Name = "OtherOpTab";
-            this.OtherOpTab.Size = new System.Drawing.Size(838, 480);
-            this.OtherOpTab.TabIndex = 5;
-            this.OtherOpTab.Text = "UpdateReviewCardDate";
-            this.OtherOpTab.UseVisualStyleBackColor = true;
+            this.UpdateReviewCardDate.Controls.Add(this.ReviewCardProgressLbl);
+            this.UpdateReviewCardDate.Controls.Add(this.ReviewCardProgressBar);
+            this.UpdateReviewCardDate.Controls.Add(this.ReviewCardResultTxt);
+            this.UpdateReviewCardDate.Controls.Add(this.ReviewCardQueryTxt);
+            this.UpdateReviewCardDate.Controls.Add(this.ReviewCardDataBtn);
+            this.UpdateReviewCardDate.Controls.Add(this.label7);
+            this.UpdateReviewCardDate.Location = new System.Drawing.Point(4, 25);
+            this.UpdateReviewCardDate.Name = "UpdateReviewCardDate";
+            this.UpdateReviewCardDate.Size = new System.Drawing.Size(838, 480);
+            this.UpdateReviewCardDate.TabIndex = 5;
+            this.UpdateReviewCardDate.Text = "UpdateReviewCardDate";
+            this.UpdateReviewCardDate.UseVisualStyleBackColor = true;
+            // 
+            // ReviewCardProgressLbl
+            // 
+            this.ReviewCardProgressLbl.AutoSize = true;
+            this.ReviewCardProgressLbl.Location = new System.Drawing.Point(470, 146);
+            this.ReviewCardProgressLbl.Name = "ReviewCardProgressLbl";
+            this.ReviewCardProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.ReviewCardProgressLbl.TabIndex = 33;
             // 
             // ReviewCardProgressBar
             // 
@@ -452,13 +469,71 @@ namespace MonthReadingRecalculation
             this.label7.Text = "Write month reading query then press Update to begin update phase no, gucode and " +
     "activity month reading rows";
             // 
-            // ReviewCardProgressLbl
+            // UpdateTarrifDifference
             // 
-            this.ReviewCardProgressLbl.AutoSize = true;
-            this.ReviewCardProgressLbl.Location = new System.Drawing.Point(470, 146);
-            this.ReviewCardProgressLbl.Name = "ReviewCardProgressLbl";
-            this.ReviewCardProgressLbl.Size = new System.Drawing.Size(0, 17);
-            this.ReviewCardProgressLbl.TabIndex = 33;
+            this.UpdateTarrifDifference.Controls.Add(this.TarrifDifferenceResultTxt);
+            this.UpdateTarrifDifference.Controls.Add(this.TarrifDifferenceProgressLbl);
+            this.UpdateTarrifDifference.Controls.Add(this.TarrifDifferenceProgressBar);
+            this.UpdateTarrifDifference.Controls.Add(this.TarrifDifferenceQueryTxt);
+            this.UpdateTarrifDifference.Controls.Add(this.TarrifDifferenceBtn);
+            this.UpdateTarrifDifference.Controls.Add(this.label9);
+            this.UpdateTarrifDifference.Location = new System.Drawing.Point(4, 25);
+            this.UpdateTarrifDifference.Name = "UpdateTarrifDifference";
+            this.UpdateTarrifDifference.Size = new System.Drawing.Size(838, 480);
+            this.UpdateTarrifDifference.TabIndex = 6;
+            this.UpdateTarrifDifference.Text = "UpdateTarrifDifference";
+            this.UpdateTarrifDifference.UseVisualStyleBackColor = true;
+            // 
+            // TarrifDifferenceProgressBar
+            // 
+            this.TarrifDifferenceProgressBar.Location = new System.Drawing.Point(213, 144);
+            this.TarrifDifferenceProgressBar.Name = "TarrifDifferenceProgressBar";
+            this.TarrifDifferenceProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.TarrifDifferenceProgressBar.TabIndex = 36;
+            // 
+            // TarrifDifferenceQueryTxt
+            // 
+            this.TarrifDifferenceQueryTxt.EnableAutoDragDrop = true;
+            this.TarrifDifferenceQueryTxt.Location = new System.Drawing.Point(30, 53);
+            this.TarrifDifferenceQueryTxt.Name = "TarrifDifferenceQueryTxt";
+            this.TarrifDifferenceQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.TarrifDifferenceQueryTxt.TabIndex = 33;
+            this.TarrifDifferenceQueryTxt.Text = "";
+            // 
+            // TarrifDifferenceBtn
+            // 
+            this.TarrifDifferenceBtn.Location = new System.Drawing.Point(95, 140);
+            this.TarrifDifferenceBtn.Name = "TarrifDifferenceBtn";
+            this.TarrifDifferenceBtn.Size = new System.Drawing.Size(93, 30);
+            this.TarrifDifferenceBtn.TabIndex = 35;
+            this.TarrifDifferenceBtn.Text = "Update";
+            this.TarrifDifferenceBtn.UseVisualStyleBackColor = true;
+            // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(27, 25);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(777, 25);
+            this.label9.TabIndex = 34;
+            this.label9.Text = "Write month reading query then press Update to begin update phase no, gucode and " +
+    "activity month reading rows";
+            // 
+            // TarrifDifferenceProgressLbl
+            // 
+            this.TarrifDifferenceProgressLbl.AutoSize = true;
+            this.TarrifDifferenceProgressLbl.Location = new System.Drawing.Point(478, 147);
+            this.TarrifDifferenceProgressLbl.Name = "TarrifDifferenceProgressLbl";
+            this.TarrifDifferenceProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.TarrifDifferenceProgressLbl.TabIndex = 37;
+            // 
+            // TarrifDifferenceResultTxt
+            // 
+            this.TarrifDifferenceResultTxt.Location = new System.Drawing.Point(30, 176);
+            this.TarrifDifferenceResultTxt.Name = "TarrifDifferenceResultTxt";
+            this.TarrifDifferenceResultTxt.ReadOnly = true;
+            this.TarrifDifferenceResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.TarrifDifferenceResultTxt.TabIndex = 38;
+            this.TarrifDifferenceResultTxt.Text = "";
             // 
             // FrmRecalculate
             // 
@@ -479,8 +554,10 @@ namespace MonthReadingRecalculation
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
-            this.OtherOpTab.ResumeLayout(false);
-            this.OtherOpTab.PerformLayout();
+            this.UpdateReviewCardDate.ResumeLayout(false);
+            this.UpdateReviewCardDate.PerformLayout();
+            this.UpdateTarrifDifference.ResumeLayout(false);
+            this.UpdateTarrifDifference.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -520,12 +597,19 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.ProgressBar UpdateProgressBar;
         private System.Windows.Forms.Label CancelProgressLbl;
         private System.Windows.Forms.ProgressBar CancelProgressBar;
-        private System.Windows.Forms.TabPage OtherOpTab;
+        private System.Windows.Forms.TabPage UpdateReviewCardDate;
         private System.Windows.Forms.ProgressBar ReviewCardProgressBar;
         private System.Windows.Forms.RichTextBox ReviewCardResultTxt;
         public System.Windows.Forms.RichTextBox ReviewCardQueryTxt;
         private System.Windows.Forms.Button ReviewCardDataBtn;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label ReviewCardProgressLbl;
+        private System.Windows.Forms.TabPage UpdateTarrifDifference;
+        private System.Windows.Forms.ProgressBar TarrifDifferenceProgressBar;
+        public System.Windows.Forms.RichTextBox TarrifDifferenceQueryTxt;
+        private System.Windows.Forms.Button TarrifDifferenceBtn;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label TarrifDifferenceProgressLbl;
+        private System.Windows.Forms.RichTextBox TarrifDifferenceResultTxt;
     }
 }
