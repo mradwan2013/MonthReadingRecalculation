@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsumptionModel.cs" />
     <Compile Include="dboperation.cs" />
     <Compile Include="FrmRecalculate.cs">
       <SubType>Form</SubType>
