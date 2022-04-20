@@ -453,7 +453,8 @@ namespace MonthReadingRecalculation
                     SewagePercentage = Convert.ToDecimal(dataTariff.Rows[i]["SwgPercent"].ToString());
                     IsStepSwgPrice = Convert.ToBoolean(dataTariff.Rows[i]["IsStepSwgPrice"].ToString());
                     StepSwgPrice = Convert.ToDecimal(dataTariff.Rows[i]["StepSwgPrice"].ToString());
-                    totalSewage = SewagePrice > 0 ? (SewagePercentage * SewagePrice / 100) : (SewagePercentage * Price / 100);
+                    // totalSewage = SewagePrice > 0 ? (SewagePercentage * SewagePrice / 100) : (SewagePercentage * Price / 100);
+                    totalSewage = (IsStepSwgPrice ? StepSwgPrice : (SewagePrice == 0 ? Price : SewagePrice)) * SewagePercentage / 100;
                 }
                 else
                 {
@@ -1337,9 +1338,10 @@ namespace MonthReadingRecalculation
             try
             {
                 // Get adjustment Type
-                int adjustmentType = 20;
-                int MaxInstalmentsAmount = 2000;
-                int DefaultInstalmentsNumber = 12;
+                var adjustmentType = int.Parse(db.ReturnStr("select id from AdjustmentTypes where Code = '6'"));
+                var setingDT = db.SelectData("select top 1 MaxInstalmentsAmount,DefaultInstalmentsNumber from settings");
+                var MaxInstalmentsAmount = Convert.ToDecimal(string.IsNullOrEmpty(setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString()) ? "0" : setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString());
+                var DefaultInstalmentsNumber = int.Parse(string.IsNullOrEmpty(setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString()) ? "1" : setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString());
                 var newActiveDate = new System.DateTime(2022, 3, 1);
 
                 // Get new water price
@@ -1358,23 +1360,25 @@ namespace MonthReadingRecalculation
                 transaction = db.objcmd.Connection.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
                 db.objcmd.Transaction = transaction;
 
-
                 // Save Water Tariff Price Differences
-                string query = $@" insert into TariffPriceDifferences ( MeterId , ActivityId,OldTariffDate,NewTariffDate,MonthReadingsId, Year, Month ,ChargeSerialNu,MeterTotalConsumption, MeterConsumptionPrice , OldWaterPrice , OldHealthyPrice,OldServiceBoxPrice , NewWaterPrice , NewHealthyPrice,NewServiceBoxPrice,NewConsumptionPrice,ConsumptionPriceDifference,isAdjustmentAdded,CreatedDate,CreatedBy )
-                               values('{meterId}','{activityId}','{oldActiveDate.ToString("yyyy-MM-dd")}','{newActiveDate.ToString("yyyy-MM-dd")}',{MonthReadingID},{year},{month},'{serialNu}',{totalConsumption},{oldConsumptionMoney},{oldCBMPrice},{oldHealthy},{oldServiceBox},{newConsumptionModel.WaterPrice},{newConsumptionModel.SewagePrice},{newConsumptionModel.ServiceBoxWithTax},{newTotalPrice},{consumptionPriceDifference},0,getDate(),'11210-1')";
+                string query = " insert into TariffPriceDifferences ( MeterId , ActivityId,OldTariffDate,NewTariffDate,MonthReadingsId, Year, Month ,ChargeSerialNu,MeterTotalConsumption, MeterConsumptionPrice , OldWaterPrice , OldHealthyPrice,OldServiceBoxPrice ,"
+                             + " NewWaterPrice , NewHealthyPrice,NewServiceBoxPrice,NewConsumptionPrice,ConsumptionPriceDifference,isAdjustmentAdded,CreatedDate,CreatedBy )"
+                             + " values('" + meterId + "','" + activityId + "','" + oldActiveDate.ToString("yyyy-MM-dd") + "','" + newActiveDate.ToString("yyyy-MM-dd") + "'," + MonthReadingID + "," + year + "," + month + ",'" + serialNu + "',"
+                             + totalConsumption + "," + oldConsumptionMoney + "," + oldCBMPrice + "," + oldHealthy + "," + oldServiceBox + "," + newConsumptionModel.WaterPrice + "," + newConsumptionModel.SewagePrice + "," + newConsumptionModel.ServiceBoxWithTax + ","
+                             + newTotalPrice + "," + consumptionPriceDifference + ",0,getDate(),(select top 1 userid from users))";
                 db.objcmd.CommandText = query;
                 var ret = db.objcmd.ExecuteNonQuery();
 
                 if (ret > 0)
                 {
                     // update month reading
-                    string updateMonthReadingQuery = $@"update MonthReadings set CBMPrice = {newConsumptionModel.WaterPrice} , Healthy = {newConsumptionModel.SewagePrice} ,
-                                                            ServiceBox = {newConsumptionModel.ServiceBoxWithTax} ,
-                                                            FixFee = {newConsumptionModel.Fixfee} ,
-                                                            ConsumptionMoney = {newTotalPrice} ,
-                                                            tarriffAdjustment = {consumptionPriceDifference},
-                                                            TariffStartDate = '{newActiveDate.ToString("yyyy-MM-dd")}'
-                                                            where id = {MonthReadingID}";
+                    string updateMonthReadingQuery = "update MonthReadings set CBMPrice = " + newConsumptionModel.WaterPrice + " , Healthy = " + newConsumptionModel.SewagePrice + " ,"
+                                                            + " ServiceBox = " + newConsumptionModel.ServiceBoxWithTax + " ,"
+                                                            + " FixFee = " + newConsumptionModel.Fixfee + " ,"
+                                                            + " ConsumptionMoney = " + newTotalPrice + " ,"
+                                                            + " tarriffAdjustment = " + consumptionPriceDifference + ","
+                                                            + " TariffStartDate = '" + newActiveDate.ToString("yyyy-MM-dd") + "'"
+                                                            + " where id = " + MonthReadingID;
 
                     db.objcmd.CommandText = updateMonthReadingQuery;
                     var res = db.objcmd.ExecuteNonQuery();
@@ -1382,16 +1386,34 @@ namespace MonthReadingRecalculation
                     if (res > 0)
                     {
                         // Add Water Tariff Price Differences as adjustment if positive value 
-                        query = $@" insert into Adjustments (Code,MeterID,Type,Reason,CurrentDate,TotalValue,MonthsCount,MonthlyRate,Remminder,PaidMonths,PercentValue,IsDeleted,ActiveAd,description ,UserID ,AccountNo,inputdate , DueDate)
-                            select (IDENT_CURRENT('Adjustments') + ROW_NUMBER() OVER (ORDER BY MeterId)) ,MeterId, {adjustmentType} , (select top 1 id from AdjustmentReasons),getDate(),sum(ConsumptionPriceDifference),CASE WHEN sum(ConsumptionPriceDifference) > {MaxInstalmentsAmount}  and {MaxInstalmentsAmount} != 0  THEN {DefaultInstalmentsNumber} ELSE 1 END,CASE WHEN sum(ConsumptionPriceDifference) > {MaxInstalmentsAmount}  and {MaxInstalmentsAmount} != 0  THEN (sum(ConsumptionPriceDifference) /{DefaultInstalmentsNumber})   ELSE sum(ConsumptionPriceDifference)  END,sum(ConsumptionPriceDifference),0,100,0,1,(select concat(sum(ConsumptionPriceDifference) , '')) + (select '  فرق التعريفة اثر رجعي ') ,'11210-1',(SELECT top 1 AccountNo FROM METERS where meterid = TariffPriceDifferences.MeterId),getDate(),getDate()
-                            from TariffPriceDifferences
-                            where isAdjustmentAdded = 0 and ConsumptionPriceDifference > 0.1
-                            group by MeterId";
+                        query = " insert into Adjustments (Code,MeterID,Type,Reason,CurrentDate,TotalValue,MonthsCount,MonthlyRate,Remminder,PaidMonths,PercentValue,IsDeleted,ActiveAd,description ,UserID ,AccountNo,inputdate , DueDate) "
+                            + " select (IDENT_CURRENT('Adjustments') + ROW_NUMBER() OVER (ORDER BY MeterId)) ,MeterId, " + adjustmentType + " , (select top 1 id from AdjustmentReasons),getDate(),sum(ConsumptionPriceDifference),CASE WHEN "
+                            + " sum(ConsumptionPriceDifference) > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN " + DefaultInstalmentsNumber + " ELSE 1 END,"
+                            + " CASE WHEN sum(ConsumptionPriceDifference) > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN (sum(ConsumptionPriceDifference) / " + DefaultInstalmentsNumber + " )   ELSE sum(ConsumptionPriceDifference) "
+                            + " END,sum(ConsumptionPriceDifference),0,100,0,1,(select concat(sum(ConsumptionPriceDifference) , '')) + (select '  فرق التعريفة اثر رجعي ') ,"
+                            + " (select top 1 userid from users),(SELECT top 1 AccountNo FROM METERS where meterid = TariffPriceDifferences.MeterId),getDate(),getDate() "
+                            + " from TariffPriceDifferences "
+                            + " where isAdjustmentAdded = 0 and ConsumptionPriceDifference > 0.1 "
+                            + " group by MeterId ";
 
                         db.objcmd.CommandText = query;
                         db.objcmd.ExecuteNonQuery();
 
-                        query = $@"update TariffPriceDifferences set isAdjustmentAdded = 1 where isAdjustmentAdded = 0";
+                        query = "update TariffPriceDifferences set isAdjustmentAdded = 1 where isAdjustmentAdded = 0";
+                        db.objcmd.CommandText = query;
+                        db.objcmd.ExecuteNonQuery();
+
+                        // insert Reading Stairs
+                        query = "delete from ReadingStairs where ReadingID = " + MonthReadingID;
+                        db.objcmd.CommandText = query;
+                        db.objcmd.ExecuteNonQuery();
+
+                        query = " Insert into ReadingStairs(ReadingID, Price1, Price2, Price3, Price4, Price5, Price6, "
+                              + " WaterPrice1, WaterPrice2, WaterPrice3, WaterPrice4, WaterPrice5, WaterPrice6, QuantityStair1, QuantityStair2, "
+                              + " QuantityStair3, QuantityStair4, QuantityStair5, QuantityStair6, Heleathy1, Heleathy2, Heleathy3, Heleathy4, Heleathy5, Heleathy6, WService)"
+                              + " Values ( " + MonthReadingID + "," + newConsumptionModel.Stairs.Rows[0]["Price1"] + "," + newConsumptionModel.Stairs.Rows[0]["Price2"] + "," + newConsumptionModel.Stairs.Rows[0]["Price3"] + "," + newConsumptionModel.Stairs.Rows[0]["Price4"] + "," + newConsumptionModel.Stairs.Rows[0]["Price5"] + "," + newConsumptionModel.Stairs.Rows[0]["Price6"] + ","
+                              + newConsumptionModel.Stairs.Rows[0]["WaterPrice1"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice2"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice3"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice4"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice5"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice6"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair1"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair2"] + ", "
+                              + newConsumptionModel.Stairs.Rows[0]["QuantityStair3"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair4"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair5"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair6"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy1"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy2"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy3"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy4"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy5"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy6"] + "," + newConsumptionModel.Stairs.Rows[0]["WService"] + ")";
                         db.objcmd.CommandText = query;
                         db.objcmd.ExecuteNonQuery();
                     }
