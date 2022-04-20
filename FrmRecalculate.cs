@@ -1403,19 +1403,19 @@ namespace MonthReadingRecalculation
                         db.objcmd.CommandText = query;
                         db.objcmd.ExecuteNonQuery();
 
-                        // insert Reading Stairs
-                        query = "delete from ReadingStairs where ReadingID = " + MonthReadingID;
-                        db.objcmd.CommandText = query;
-                        db.objcmd.ExecuteNonQuery();
+                        //// insert Reading Stairs
+                        //query = "delete from ReadingStairs where ReadingID = " + MonthReadingID;
+                        //db.objcmd.CommandText = query;
+                        //db.objcmd.ExecuteNonQuery();
 
-                        query = " Insert into ReadingStairs(ReadingID, Price1, Price2, Price3, Price4, Price5, Price6, "
-                              + " WaterPrice1, WaterPrice2, WaterPrice3, WaterPrice4, WaterPrice5, WaterPrice6, QuantityStair1, QuantityStair2, "
-                              + " QuantityStair3, QuantityStair4, QuantityStair5, QuantityStair6, Heleathy1, Heleathy2, Heleathy3, Heleathy4, Heleathy5, Heleathy6, WService)"
-                              + " Values ( " + MonthReadingID + "," + newConsumptionModel.Stairs.Rows[0]["Price1"] + "," + newConsumptionModel.Stairs.Rows[0]["Price2"] + "," + newConsumptionModel.Stairs.Rows[0]["Price3"] + "," + newConsumptionModel.Stairs.Rows[0]["Price4"] + "," + newConsumptionModel.Stairs.Rows[0]["Price5"] + "," + newConsumptionModel.Stairs.Rows[0]["Price6"] + ","
-                              + newConsumptionModel.Stairs.Rows[0]["WaterPrice1"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice2"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice3"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice4"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice5"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice6"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair1"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair2"] + ", "
-                              + newConsumptionModel.Stairs.Rows[0]["QuantityStair3"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair4"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair5"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair6"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy1"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy2"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy3"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy4"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy5"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy6"] + "," + newConsumptionModel.Stairs.Rows[0]["WService"] + ")";
-                        db.objcmd.CommandText = query;
-                        db.objcmd.ExecuteNonQuery();
+                        //query = " Insert into ReadingStairs(ReadingID, Price1, Price2, Price3, Price4, Price5, Price6, "
+                        //      + " WaterPrice1, WaterPrice2, WaterPrice3, WaterPrice4, WaterPrice5, WaterPrice6, QuantityStair1, QuantityStair2, "
+                        //      + " QuantityStair3, QuantityStair4, QuantityStair5, QuantityStair6, Heleathy1, Heleathy2, Heleathy3, Heleathy4, Heleathy5, Heleathy6, WService)"
+                        //      + " Values ( " + MonthReadingID + "," + newConsumptionModel.Stairs.Rows[0]["Price1"] + "," + newConsumptionModel.Stairs.Rows[0]["Price2"] + "," + newConsumptionModel.Stairs.Rows[0]["Price3"] + "," + newConsumptionModel.Stairs.Rows[0]["Price4"] + "," + newConsumptionModel.Stairs.Rows[0]["Price5"] + "," + newConsumptionModel.Stairs.Rows[0]["Price6"] + ","
+                        //      + newConsumptionModel.Stairs.Rows[0]["WaterPrice1"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice2"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice3"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice4"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice5"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice6"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair1"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair2"] + ", "
+                        //      + newConsumptionModel.Stairs.Rows[0]["QuantityStair3"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair4"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair5"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair6"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy1"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy2"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy3"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy4"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy5"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy6"] + "," + newConsumptionModel.Stairs.Rows[0]["WService"] + ")";
+                        //db.objcmd.CommandText = query;
+                        //db.objcmd.ExecuteNonQuery();
                     }
                 }
 
