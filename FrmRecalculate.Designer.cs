@@ -76,6 +76,13 @@ namespace MonthReadingRecalculation
             this.TarrifDifferenceQueryTxt = new System.Windows.Forms.RichTextBox();
             this.TarrifDifferenceBtn = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
+            this.FixSewageCalc = new System.Windows.Forms.TabPage();
+            this.FixSewageResultTxt = new System.Windows.Forms.RichTextBox();
+            this.FixSewageProgressBar = new System.Windows.Forms.ProgressBar();
+            this.FixSewageQueryTxt = new System.Windows.Forms.RichTextBox();
+            this.FixSewageBtn = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
+            this.FixSewageProgressLbl = new System.Windows.Forms.Label();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
@@ -84,6 +91,7 @@ namespace MonthReadingRecalculation
             this.tabControl1.SuspendLayout();
             this.UpdateReviewCardDate.SuspendLayout();
             this.UpdateTarrifDifference.SuspendLayout();
+            this.FixSewageCalc.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelChTab
@@ -96,7 +104,7 @@ namespace MonthReadingRecalculation
             this.CancelChTab.Controls.Add(this.label6);
             this.CancelChTab.Location = new System.Drawing.Point(4, 25);
             this.CancelChTab.Name = "CancelChTab";
-            this.CancelChTab.Size = new System.Drawing.Size(838, 480);
+            this.CancelChTab.Size = new System.Drawing.Size(1018, 480);
             this.CancelChTab.TabIndex = 3;
             this.CancelChTab.Text = "Cancel Charges";
             this.CancelChTab.UseVisualStyleBackColor = true;
@@ -163,7 +171,7 @@ namespace MonthReadingRecalculation
             this.RecalcMrTab.Location = new System.Drawing.Point(4, 25);
             this.RecalcMrTab.Name = "RecalcMrTab";
             this.RecalcMrTab.Padding = new System.Windows.Forms.Padding(3);
-            this.RecalcMrTab.Size = new System.Drawing.Size(838, 480);
+            this.RecalcMrTab.Size = new System.Drawing.Size(1018, 480);
             this.RecalcMrTab.TabIndex = 1;
             this.RecalcMrTab.Text = "RecalculateMonthReadings";
             this.RecalcMrTab.UseVisualStyleBackColor = true;
@@ -241,7 +249,7 @@ namespace MonthReadingRecalculation
             this.UpdateMrTab.Location = new System.Drawing.Point(4, 25);
             this.UpdateMrTab.Name = "UpdateMrTab";
             this.UpdateMrTab.Padding = new System.Windows.Forms.Padding(3);
-            this.UpdateMrTab.Size = new System.Drawing.Size(838, 480);
+            this.UpdateMrTab.Size = new System.Drawing.Size(1018, 480);
             this.UpdateMrTab.TabIndex = 4;
             this.UpdateMrTab.Text = "UpdateMonthReadingData";
             this.UpdateMrTab.UseVisualStyleBackColor = true;
@@ -304,7 +312,7 @@ namespace MonthReadingRecalculation
             this.DBConnectionTab.Location = new System.Drawing.Point(4, 25);
             this.DBConnectionTab.Name = "DBConnectionTab";
             this.DBConnectionTab.Padding = new System.Windows.Forms.Padding(3);
-            this.DBConnectionTab.Size = new System.Drawing.Size(838, 480);
+            this.DBConnectionTab.Size = new System.Drawing.Size(1018, 480);
             this.DBConnectionTab.TabIndex = 0;
             this.DBConnectionTab.Text = "DB connection";
             this.DBConnectionTab.UseVisualStyleBackColor = true;
@@ -396,10 +404,11 @@ namespace MonthReadingRecalculation
             this.tabControl1.Controls.Add(this.CancelChTab);
             this.tabControl1.Controls.Add(this.UpdateReviewCardDate);
             this.tabControl1.Controls.Add(this.UpdateTarrifDifference);
+            this.tabControl1.Controls.Add(this.FixSewageCalc);
             this.tabControl1.Location = new System.Drawing.Point(21, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(846, 509);
+            this.tabControl1.Size = new System.Drawing.Size(1026, 509);
             this.tabControl1.TabIndex = 18;
             // 
             // UpdateReviewCardDate
@@ -412,7 +421,7 @@ namespace MonthReadingRecalculation
             this.UpdateReviewCardDate.Controls.Add(this.label7);
             this.UpdateReviewCardDate.Location = new System.Drawing.Point(4, 25);
             this.UpdateReviewCardDate.Name = "UpdateReviewCardDate";
-            this.UpdateReviewCardDate.Size = new System.Drawing.Size(838, 480);
+            this.UpdateReviewCardDate.Size = new System.Drawing.Size(1018, 480);
             this.UpdateReviewCardDate.TabIndex = 5;
             this.UpdateReviewCardDate.Text = "UpdateReviewCardDate";
             this.UpdateReviewCardDate.UseVisualStyleBackColor = true;
@@ -479,7 +488,7 @@ namespace MonthReadingRecalculation
             this.UpdateTarrifDifference.Controls.Add(this.label9);
             this.UpdateTarrifDifference.Location = new System.Drawing.Point(4, 25);
             this.UpdateTarrifDifference.Name = "UpdateTarrifDifference";
-            this.UpdateTarrifDifference.Size = new System.Drawing.Size(838, 480);
+            this.UpdateTarrifDifference.Size = new System.Drawing.Size(1018, 480);
             this.UpdateTarrifDifference.TabIndex = 6;
             this.UpdateTarrifDifference.Text = "UpdateTarrifDifference";
             this.UpdateTarrifDifference.UseVisualStyleBackColor = true;
@@ -533,14 +542,81 @@ namespace MonthReadingRecalculation
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(777, 25);
             this.label9.TabIndex = 34;
-            this.label9.Text = "Write month reading query then press Update to begin update phase no, gucode and " +
-    "activity month reading rows";
+            this.label9.Text = "Write month reading query then press Update to begin review old month readings an" +
+    "d apply tarrif differenec";
+            // 
+            // FixSewageCalc
+            // 
+            this.FixSewageCalc.Controls.Add(this.FixSewageProgressLbl);
+            this.FixSewageCalc.Controls.Add(this.FixSewageResultTxt);
+            this.FixSewageCalc.Controls.Add(this.FixSewageProgressBar);
+            this.FixSewageCalc.Controls.Add(this.FixSewageQueryTxt);
+            this.FixSewageCalc.Controls.Add(this.FixSewageBtn);
+            this.FixSewageCalc.Controls.Add(this.label10);
+            this.FixSewageCalc.Location = new System.Drawing.Point(4, 25);
+            this.FixSewageCalc.Name = "FixSewageCalc";
+            this.FixSewageCalc.Size = new System.Drawing.Size(1018, 480);
+            this.FixSewageCalc.TabIndex = 7;
+            this.FixSewageCalc.Text = "FixSewageCalc";
+            this.FixSewageCalc.UseVisualStyleBackColor = true;
+            // 
+            // FixSewageResultTxt
+            // 
+            this.FixSewageResultTxt.Location = new System.Drawing.Point(95, 183);
+            this.FixSewageResultTxt.Name = "FixSewageResultTxt";
+            this.FixSewageResultTxt.ReadOnly = true;
+            this.FixSewageResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.FixSewageResultTxt.TabIndex = 43;
+            this.FixSewageResultTxt.Text = "";
+            // 
+            // FixSewageProgressBar
+            // 
+            this.FixSewageProgressBar.Location = new System.Drawing.Point(278, 151);
+            this.FixSewageProgressBar.Name = "FixSewageProgressBar";
+            this.FixSewageProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.FixSewageProgressBar.TabIndex = 42;
+            // 
+            // FixSewageQueryTxt
+            // 
+            this.FixSewageQueryTxt.EnableAutoDragDrop = true;
+            this.FixSewageQueryTxt.Location = new System.Drawing.Point(95, 60);
+            this.FixSewageQueryTxt.Name = "FixSewageQueryTxt";
+            this.FixSewageQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.FixSewageQueryTxt.TabIndex = 39;
+            this.FixSewageQueryTxt.Text = "";
+            // 
+            // FixSewageBtn
+            // 
+            this.FixSewageBtn.Location = new System.Drawing.Point(160, 147);
+            this.FixSewageBtn.Name = "FixSewageBtn";
+            this.FixSewageBtn.Size = new System.Drawing.Size(93, 30);
+            this.FixSewageBtn.TabIndex = 41;
+            this.FixSewageBtn.Text = "Update";
+            this.FixSewageBtn.UseVisualStyleBackColor = true;
+            this.FixSewageBtn.Click += new System.EventHandler(this.FixSewageBtn_Click);
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(92, 32);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(777, 25);
+            this.label10.TabIndex = 40;
+            this.label10.Text = "Write month reading query then press Update to begin review old month readings ta" +
+    "rrif difference sewage money";
+            // 
+            // FixSewageProgressLbl
+            // 
+            this.FixSewageProgressLbl.AutoSize = true;
+            this.FixSewageProgressLbl.Location = new System.Drawing.Point(527, 156);
+            this.FixSewageProgressLbl.Name = "FixSewageProgressLbl";
+            this.FixSewageProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.FixSewageProgressLbl.TabIndex = 44;
             // 
             // FrmRecalculate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(886, 548);
+            this.ClientSize = new System.Drawing.Size(1059, 548);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "FrmRecalculate";
@@ -559,6 +635,8 @@ namespace MonthReadingRecalculation
             this.UpdateReviewCardDate.PerformLayout();
             this.UpdateTarrifDifference.ResumeLayout(false);
             this.UpdateTarrifDifference.PerformLayout();
+            this.FixSewageCalc.ResumeLayout(false);
+            this.FixSewageCalc.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -612,5 +690,12 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label TarrifDifferenceProgressLbl;
         private System.Windows.Forms.RichTextBox TarrifDifferenceResultTxt;
+        private System.Windows.Forms.TabPage FixSewageCalc;
+        private System.Windows.Forms.RichTextBox FixSewageResultTxt;
+        private System.Windows.Forms.ProgressBar FixSewageProgressBar;
+        public System.Windows.Forms.RichTextBox FixSewageQueryTxt;
+        private System.Windows.Forms.Button FixSewageBtn;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label FixSewageProgressLbl;
     }
 }
