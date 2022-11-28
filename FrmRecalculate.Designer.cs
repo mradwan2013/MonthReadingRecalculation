@@ -77,12 +77,19 @@ namespace MonthReadingRecalculation
             this.TarrifDifferenceBtn = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.FixSewageCalc = new System.Windows.Forms.TabPage();
+            this.FixSewageProgressLbl = new System.Windows.Forms.Label();
             this.FixSewageResultTxt = new System.Windows.Forms.RichTextBox();
             this.FixSewageProgressBar = new System.Windows.Forms.ProgressBar();
             this.FixSewageQueryTxt = new System.Windows.Forms.RichTextBox();
             this.FixSewageBtn = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
-            this.FixSewageProgressLbl = new System.Windows.Forms.Label();
+            this.CorrectReadingQuantity = new System.Windows.Forms.TabPage();
+            this.RecalcQuantityResultTxt = new System.Windows.Forms.RichTextBox();
+            this.RecalcQuantityProgressBar = new System.Windows.Forms.ProgressBar();
+            this.RecalcQuantityQueryTxt = new System.Windows.Forms.RichTextBox();
+            this.RecalcQuantityBtn = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
+            this.RecalcQuantityProgressLbl = new System.Windows.Forms.Label();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
@@ -92,6 +99,7 @@ namespace MonthReadingRecalculation
             this.UpdateReviewCardDate.SuspendLayout();
             this.UpdateTarrifDifference.SuspendLayout();
             this.FixSewageCalc.SuspendLayout();
+            this.CorrectReadingQuantity.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelChTab
@@ -405,6 +413,7 @@ namespace MonthReadingRecalculation
             this.tabControl1.Controls.Add(this.UpdateReviewCardDate);
             this.tabControl1.Controls.Add(this.UpdateTarrifDifference);
             this.tabControl1.Controls.Add(this.FixSewageCalc);
+            this.tabControl1.Controls.Add(this.CorrectReadingQuantity);
             this.tabControl1.Location = new System.Drawing.Point(21, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -560,6 +569,14 @@ namespace MonthReadingRecalculation
             this.FixSewageCalc.Text = "FixSewageCalc";
             this.FixSewageCalc.UseVisualStyleBackColor = true;
             // 
+            // FixSewageProgressLbl
+            // 
+            this.FixSewageProgressLbl.AutoSize = true;
+            this.FixSewageProgressLbl.Location = new System.Drawing.Point(527, 156);
+            this.FixSewageProgressLbl.Name = "FixSewageProgressLbl";
+            this.FixSewageProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.FixSewageProgressLbl.TabIndex = 44;
+            // 
             // FixSewageResultTxt
             // 
             this.FixSewageResultTxt.Location = new System.Drawing.Point(95, 183);
@@ -604,19 +621,77 @@ namespace MonthReadingRecalculation
             this.label10.Text = "Write month reading query then press Update to begin review old month readings ta" +
     "rrif difference sewage money";
             // 
-            // FixSewageProgressLbl
+            // CorrectReadingQuantity
             // 
-            this.FixSewageProgressLbl.AutoSize = true;
-            this.FixSewageProgressLbl.Location = new System.Drawing.Point(527, 156);
-            this.FixSewageProgressLbl.Name = "FixSewageProgressLbl";
-            this.FixSewageProgressLbl.Size = new System.Drawing.Size(0, 17);
-            this.FixSewageProgressLbl.TabIndex = 44;
+            this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityProgressLbl);
+            this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityResultTxt);
+            this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityProgressBar);
+            this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityQueryTxt);
+            this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityBtn);
+            this.CorrectReadingQuantity.Controls.Add(this.label11);
+            this.CorrectReadingQuantity.Location = new System.Drawing.Point(4, 25);
+            this.CorrectReadingQuantity.Name = "CorrectReadingQuantity";
+            this.CorrectReadingQuantity.Size = new System.Drawing.Size(1018, 480);
+            this.CorrectReadingQuantity.TabIndex = 8;
+            this.CorrectReadingQuantity.Text = "CorrectReadingQuantity";
+            this.CorrectReadingQuantity.UseVisualStyleBackColor = true;
+            // 
+            // RecalcQuantityResultTxt
+            // 
+            this.RecalcQuantityResultTxt.Location = new System.Drawing.Point(95, 178);
+            this.RecalcQuantityResultTxt.Name = "RecalcQuantityResultTxt";
+            this.RecalcQuantityResultTxt.ReadOnly = true;
+            this.RecalcQuantityResultTxt.Size = new System.Drawing.Size(785, 265);
+            this.RecalcQuantityResultTxt.TabIndex = 48;
+            this.RecalcQuantityResultTxt.Text = "";
+            // 
+            // RecalcQuantityProgressBar
+            // 
+            this.RecalcQuantityProgressBar.Location = new System.Drawing.Point(278, 146);
+            this.RecalcQuantityProgressBar.Name = "RecalcQuantityProgressBar";
+            this.RecalcQuantityProgressBar.Size = new System.Drawing.Size(242, 23);
+            this.RecalcQuantityProgressBar.TabIndex = 47;
+            // 
+            // RecalcQuantityQueryTxt
+            // 
+            this.RecalcQuantityQueryTxt.EnableAutoDragDrop = true;
+            this.RecalcQuantityQueryTxt.Location = new System.Drawing.Point(95, 55);
+            this.RecalcQuantityQueryTxt.Name = "RecalcQuantityQueryTxt";
+            this.RecalcQuantityQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.RecalcQuantityQueryTxt.TabIndex = 44;
+            this.RecalcQuantityQueryTxt.Text = "";
+            // 
+            // RecalcQuantityBtn
+            // 
+            this.RecalcQuantityBtn.Location = new System.Drawing.Point(160, 142);
+            this.RecalcQuantityBtn.Name = "RecalcQuantityBtn";
+            this.RecalcQuantityBtn.Size = new System.Drawing.Size(93, 30);
+            this.RecalcQuantityBtn.TabIndex = 46;
+            this.RecalcQuantityBtn.Text = "Recalc month reading";
+            this.RecalcQuantityBtn.UseVisualStyleBackColor = true;
+            this.RecalcQuantityBtn.Click += new System.EventHandler(this.RecalcQuantityBtn_Click);
+            // 
+            // label11
+            // 
+            this.label11.Location = new System.Drawing.Point(92, 27);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(777, 25);
+            this.label11.TabIndex = 45;
+            this.label11.Text = "Recalculate month readings with new quantity updated by UAMM";
+            // 
+            // RecalcQuantityProgressLbl
+            // 
+            this.RecalcQuantityProgressLbl.AutoSize = true;
+            this.RecalcQuantityProgressLbl.Location = new System.Drawing.Point(528, 148);
+            this.RecalcQuantityProgressLbl.Name = "RecalcQuantityProgressLbl";
+            this.RecalcQuantityProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.RecalcQuantityProgressLbl.TabIndex = 49;
             // 
             // FrmRecalculate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1059, 548);
+            this.ClientSize = new System.Drawing.Size(1066, 548);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "FrmRecalculate";
@@ -637,6 +712,8 @@ namespace MonthReadingRecalculation
             this.UpdateTarrifDifference.PerformLayout();
             this.FixSewageCalc.ResumeLayout(false);
             this.FixSewageCalc.PerformLayout();
+            this.CorrectReadingQuantity.ResumeLayout(false);
+            this.CorrectReadingQuantity.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -697,5 +774,12 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Button FixSewageBtn;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label FixSewageProgressLbl;
+        private System.Windows.Forms.TabPage CorrectReadingQuantity;
+        private System.Windows.Forms.Label RecalcQuantityProgressLbl;
+        private System.Windows.Forms.RichTextBox RecalcQuantityResultTxt;
+        private System.Windows.Forms.ProgressBar RecalcQuantityProgressBar;
+        public System.Windows.Forms.RichTextBox RecalcQuantityQueryTxt;
+        private System.Windows.Forms.Button RecalcQuantityBtn;
+        private System.Windows.Forms.Label label11;
     }
 }
