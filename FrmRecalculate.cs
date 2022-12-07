@@ -1983,6 +1983,18 @@ namespace MonthReadingRecalculation
                                  " and  convert(datetime , serverDate, 103 ) < convert(datetime , '" + specificDate.ToString("dd/MM/yyyy") + "' , 103 ) order by Curdate desc ");
         }
 
+        /// <summary>
+        /// Get meter last success charge software version
+        /// </summary>
+        /// <param name="meterId"></param>
+        /// <returns>meter last success charge software version</returns>
+        public DataTable GetMeterLastSuccessChargeVersion(string meterId)
+        {
+            return new dboperation(connectionString).SelectData(" select top 1 id ,Softwareversion from charges "+
+                                   " where meterid = '" + meterId + "' and (makecard = 1 or MakeCard IS NULL) " +
+                                   " and((select count(id) from charges where type = 0 and meterid = '" + meterId + "') = 0 or serverDate >= (select max(serverDate) from charges where type = 0 and meterid = '" + meterId + "') ) order by Curdate desc ");
+        }
+
         public int UpdateMonthReadingData(int MonthReadingId, decimal UsedMonthly, decimal consumptionAdjustment, decimal tarriffAdjustment, decimal LastCBM, decimal LastHealth, decimal LastServiceBox, decimal LastFixFee)
         {
             try
@@ -2129,7 +2141,178 @@ namespace MonthReadingRecalculation
             }
         }
 
-
         #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ConnectDB();
+            RestartMonthReadingQuantity();
+            MessageBox.Show("Finished!");
+        }
+
+        public int RestartMonthReadingQuantity()
+        {
+            try
+            {
+                return new dboperation(connectionString).ExecuteNonQuery($@"Update MonthReadings set OldConsumption = [Read] where [Read] <> OldConsumption");
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            ConnectDB();
+
+            // Get latest reading for each meter
+            DataTable monthReadingList = ExecuteSelectQuery(" WITH latest_reading AS( " +
+                                        " SELECT m.ID, m.MeterID, m.aSysTime, m.MonthQuantity0, m.MonthQuantity1, m.MonthQuantity2, m.MonthQuantity3, " +
+                                        " m.MonthQuantity4, m.MonthQuantity5, m.MonthQuantity6, m.MonthQuantity7, m.MonthQuantity8, m.MonthQuantity9, m.MonthQuantity10, " +
+                                        " m.MonthQuantity11, ROW_NUMBER() OVER(PARTITION BY meterid ORDER BY serverDate DESC) AS readingOrder " +
+                                        " FROM WaterMetersReadings AS m where m.readingtype = 'Charge' and MeterID <> '' and m.MonthQuantity0 is not null " +
+                                        " ) SELECT * FROM latest_reading WHERE readingOrder = 1; ");
+
+            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
+            {
+                for (int t = 0; t < monthReadingList.Rows.Count; t++)
+                {
+                    var i = t;
+
+                    try
+                    {
+                        if (i < monthReadingList.Rows.Count)
+                        {
+                            try
+                            {
+                                fixOldConsumptions(
+                                      int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                      monthReadingList.Rows[i]["MeterID"].ToString(),
+                                      System.DateTime.Parse(monthReadingList.Rows[i]["aSysTime"].ToString()),
+                                      new decimal[] {
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity0"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity1"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity2"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity3"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity4"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity5"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity6"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity7"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity8"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity9"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity10"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity11"].ToString())
+                                      }
+                                      );
+                            }
+                            catch (Exception ex)
+                            {
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+
+            MessageBox.Show("Finished!");
+        }
+
+        /// <summary>
+        /// Recalculate water meter month readings
+        /// </summary>
+        /// <param name="MonthReadingId">Month reading Identifier</param>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="meterCurrentDate">Reading date</param>
+        /// <param name="MonthQuantity">Month reading array</param>
+        /// <returns>Add result</returns>
+        public bool fixOldConsumptions(int MonthReadingId, string MeterID, DateTime meterCurrentDate, decimal [] MonthQuantity)
+        {
+            // Get last success charge server version details
+            var softwareVersionDetails = GetMeterLastSuccessChargeVersion(MeterID);
+
+            // Review last 12 month readings
+            if (softwareVersionDetails.Rows.Count > 0 && string.IsNullOrEmpty(softwareVersionDetails.Rows[0]["Softwareversion"].ToString()))
+            {
+                int month = meterCurrentDate.Month;
+                int year = meterCurrentDate.Year;
+                int inc = 1;
+                int StartMonth = 0;
+
+                if (meterCurrentDate.Month == 1)
+                {
+                    StartMonth = month = 0;
+                }
+                else
+                {
+                    StartMonth = month = meterCurrentDate.Month - 1;
+                }
+
+                // Fix old monthreadings
+                for (int monthCount = 0; monthCount < 12; monthCount++)
+                {
+                    if (MeterID.Split('-').Length - 1 > 1)
+                    {
+                        #region fix new meter
+
+                        meterCurrentDate = meterCurrentDate.AddMonths(-1);
+
+                        var query2 = $@"if exists(select * from MonthReadings with(nolock) where MeterId = '{MeterID}' and [Year] = '{meterCurrentDate.Year}' and [Month] = '{meterCurrentDate.Month}' and OldConsumption <> '{MonthQuantity[monthCount]}')
+                                         begin
+                                             update MonthReadings with (ROWLOCK)  set OldConsumption = {MonthQuantity[monthCount]} where ID = (select top 1 Id from MonthReadings where [Year]={meterCurrentDate.Year} and [Month]={meterCurrentDate.Month} and MeterID = '{MeterID}')
+                                         End";
+                        new dboperation(connectionString).ExecuteNonQuery(query2);
+
+                        #endregion
+                    }
+                    else
+                    {
+                        #region fix old meter
+
+                        if (month == 0)
+                        {
+                            year = year - 1;
+                        }
+
+                        var query2 = $@"if exists(select * from MonthReadings with(nolock) where MeterId = '{MeterID}' and [Year] = '{year}' and [Month] = '{(month == 0 ? 12 : month)}' and OldConsumption <> '{MonthQuantity[month]}')
+                                             begin
+                                             update MonthReadings with (ROWLOCK)  set OldConsumption = {MonthQuantity[month]} where ID = (select top 1 Id from MonthReadings where [Year]={year} and [Month]={(month == 0 ? 12 : month)} and MeterID = '{MeterID}')
+                                             End";
+                        new dboperation(connectionString).ExecuteNonQuery(query2);
+
+                        if (month == 0)
+                        {
+                            inc = 1;
+                            month = StartMonth + inc;
+                            StartMonth = 0;
+                        }
+                        else if (StartMonth > 0)
+                        {
+                            inc = -1;
+                            month = month + inc;
+                        }
+                        else
+                        {
+                            month = month + inc;
+                        }
+
+                        #endregion
+                    }
+                }
+
+                // Update last success charge server version
+                var query3 = $@"if exists(select * from charges with(nolock) where id = {softwareVersionDetails.Rows[0]["id"].ToString()})
+                                begin
+                                    update charges with (ROWLOCK)  set Softwareversion = 'FixTool' where id = {softwareVersionDetails.Rows[0]["id"].ToString()}
+                                End";
+                new dboperation(connectionString).ExecuteNonQuery(query3);
+            }
+
+            return true;
+        }
+
     }
 }

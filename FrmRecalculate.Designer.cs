@@ -84,12 +84,14 @@ namespace MonthReadingRecalculation
             this.FixSewageBtn = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.CorrectReadingQuantity = new System.Windows.Forms.TabPage();
+            this.RecalcQuantityProgressLbl = new System.Windows.Forms.Label();
             this.RecalcQuantityResultTxt = new System.Windows.Forms.RichTextBox();
             this.RecalcQuantityProgressBar = new System.Windows.Forms.ProgressBar();
             this.RecalcQuantityQueryTxt = new System.Windows.Forms.RichTextBox();
             this.RecalcQuantityBtn = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.RecalcQuantityProgressLbl = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
@@ -623,6 +625,8 @@ namespace MonthReadingRecalculation
             // 
             // CorrectReadingQuantity
             // 
+            this.CorrectReadingQuantity.Controls.Add(this.button2);
+            this.CorrectReadingQuantity.Controls.Add(this.button1);
             this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityProgressLbl);
             this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityResultTxt);
             this.CorrectReadingQuantity.Controls.Add(this.RecalcQuantityProgressBar);
@@ -636,9 +640,17 @@ namespace MonthReadingRecalculation
             this.CorrectReadingQuantity.Text = "CorrectReadingQuantity";
             this.CorrectReadingQuantity.UseVisualStyleBackColor = true;
             // 
+            // RecalcQuantityProgressLbl
+            // 
+            this.RecalcQuantityProgressLbl.AutoSize = true;
+            this.RecalcQuantityProgressLbl.Location = new System.Drawing.Point(404, 148);
+            this.RecalcQuantityProgressLbl.Name = "RecalcQuantityProgressLbl";
+            this.RecalcQuantityProgressLbl.Size = new System.Drawing.Size(0, 17);
+            this.RecalcQuantityProgressLbl.TabIndex = 49;
+            // 
             // RecalcQuantityResultTxt
             // 
-            this.RecalcQuantityResultTxt.Location = new System.Drawing.Point(95, 178);
+            this.RecalcQuantityResultTxt.Location = new System.Drawing.Point(23, 203);
             this.RecalcQuantityResultTxt.Name = "RecalcQuantityResultTxt";
             this.RecalcQuantityResultTxt.ReadOnly = true;
             this.RecalcQuantityResultTxt.Size = new System.Drawing.Size(785, 265);
@@ -647,7 +659,7 @@ namespace MonthReadingRecalculation
             // 
             // RecalcQuantityProgressBar
             // 
-            this.RecalcQuantityProgressBar.Location = new System.Drawing.Point(278, 146);
+            this.RecalcQuantityProgressBar.Location = new System.Drawing.Point(151, 145);
             this.RecalcQuantityProgressBar.Name = "RecalcQuantityProgressBar";
             this.RecalcQuantityProgressBar.Size = new System.Drawing.Size(242, 23);
             this.RecalcQuantityProgressBar.TabIndex = 47;
@@ -655,15 +667,15 @@ namespace MonthReadingRecalculation
             // RecalcQuantityQueryTxt
             // 
             this.RecalcQuantityQueryTxt.EnableAutoDragDrop = true;
-            this.RecalcQuantityQueryTxt.Location = new System.Drawing.Point(95, 55);
+            this.RecalcQuantityQueryTxt.Location = new System.Drawing.Point(25, 55);
             this.RecalcQuantityQueryTxt.Name = "RecalcQuantityQueryTxt";
-            this.RecalcQuantityQueryTxt.Size = new System.Drawing.Size(785, 75);
+            this.RecalcQuantityQueryTxt.Size = new System.Drawing.Size(714, 75);
             this.RecalcQuantityQueryTxt.TabIndex = 44;
             this.RecalcQuantityQueryTxt.Text = "";
             // 
             // RecalcQuantityBtn
             // 
-            this.RecalcQuantityBtn.Location = new System.Drawing.Point(160, 142);
+            this.RecalcQuantityBtn.Location = new System.Drawing.Point(43, 141);
             this.RecalcQuantityBtn.Name = "RecalcQuantityBtn";
             this.RecalcQuantityBtn.Size = new System.Drawing.Size(93, 30);
             this.RecalcQuantityBtn.TabIndex = 46;
@@ -673,19 +685,31 @@ namespace MonthReadingRecalculation
             // 
             // label11
             // 
-            this.label11.Location = new System.Drawing.Point(92, 27);
+            this.label11.Location = new System.Drawing.Point(22, 27);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(777, 25);
             this.label11.TabIndex = 45;
             this.label11.Text = "Recalculate month readings with new quantity updated by UAMM";
             // 
-            // RecalcQuantityProgressLbl
+            // button1
             // 
-            this.RecalcQuantityProgressLbl.AutoSize = true;
-            this.RecalcQuantityProgressLbl.Location = new System.Drawing.Point(528, 148);
-            this.RecalcQuantityProgressLbl.Name = "RecalcQuantityProgressLbl";
-            this.RecalcQuantityProgressLbl.Size = new System.Drawing.Size(0, 17);
-            this.RecalcQuantityProgressLbl.TabIndex = 49;
+            this.button1.Location = new System.Drawing.Point(745, 55);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(261, 30);
+            this.button1.TabIndex = 50;
+            this.button1.Text = "Restart old consumption";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(745, 100);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(261, 30);
+            this.button2.TabIndex = 51;
+            this.button2.Text = "Update old consumption";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // FrmRecalculate
             // 
@@ -781,5 +805,7 @@ namespace MonthReadingRecalculation
         public System.Windows.Forms.RichTextBox RecalcQuantityQueryTxt;
         private System.Windows.Forms.Button RecalcQuantityBtn;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }
