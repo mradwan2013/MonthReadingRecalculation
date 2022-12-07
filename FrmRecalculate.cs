@@ -2309,6 +2309,8 @@ namespace MonthReadingRecalculation
                                     update charges with (ROWLOCK)  set Softwareversion = 'FixTool' where id = {softwareVersionDetails.Rows[0]["id"].ToString()}
                                 End";
                 new dboperation(connectionString).ExecuteNonQuery(query3);
+
+                // Call fix RecalcWaterMonthReadingsWithNewQuantity
             }
 
             return true;
