@@ -1746,7 +1746,7 @@ namespace MonthReadingRecalculation
                         try
                         {
                             worker.ReportProgress(t);
-                            
+
                             if (i < monthReadingList.Rows.Count)
                             {
                                 try
@@ -1813,10 +1813,14 @@ namespace MonthReadingRecalculation
         /// <param name="meterUnits">meterUnits</param> 
         /// <param name="MeterVersionType">MeterVersionType</param> 
         /// <returns>Add result</returns>
-        public bool RecalcWaterMonthReadingsWithNewQuantity(int MonthReadingId, string MeterID, string ActivityID, int sewage, int meterUnits, decimal OldConsumption,decimal NewConsumption,decimal UsedMonthly, int Year, int Month, decimal oldConsumptionAdjustment,decimal oldTarriffAdjustment,decimal meterInstallment)
+        public bool RecalcWaterMonthReadingsWithNewQuantity(int MonthReadingId, string MeterID, string ActivityID, int sewage, int meterUnits, decimal OldConsumption, decimal NewConsumption, decimal UsedMonthly, int Year, int Month, decimal oldConsumptionAdjustment, decimal oldTarriffAdjustment, decimal meterInstallment)
         {
             try
             {
+                decimal LastCBM = 0;
+                decimal LastHealth = 0;
+                decimal LastServiceBox = 0;
+                decimal LastFixFee = 0;
                 decimal consumptionAdjustment = 0;
                 decimal tarriffAdjustment = 0;
                 var monthDate = new System.DateTime(Year, Month, 1);
@@ -1828,11 +1832,15 @@ namespace MonthReadingRecalculation
                 // Get expected tarrif calculation object
                 var expectedConsumptionModel = GetSpecificDateConsumption(monthDate.AddMonths(1).AddDays(-1), ActivityID, meterUnits, sewage, NewConsumption, MeterID);
 
-                // Set old meters used month
-                if (meterType == 10 || meterType == 11)
-                {
-                    UsedMonthly = expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee;
-                }
+                // Set new consumption money
+                //if (meterType == 10 || meterType == 11)
+                //{
+                UsedMonthly = expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee;
+                LastCBM = expectedConsumptionModel.WaterPrice;
+                LastHealth = expectedConsumptionModel.SewagePrice;
+                LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
+                LastFixFee = expectedConsumptionModel.Fixfee;
+                //}
 
                 // Get last success charge details
                 DataTable lastChargeDT = GetMeterLastSuccessCharge(MeterID, monthDate.AddMonths(1));
@@ -1849,11 +1857,15 @@ namespace MonthReadingRecalculation
                     {
                         tarriffAdjustment = (expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee + meterInstallment) - (lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee);
 
-                        // Set old meters used month
-                        if (meterType == 10 || meterType == 11)
-                        {
-                            UsedMonthly = lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee;
-                        }
+                        // Set new consumption money
+                        //if (meterType == 10 || meterType == 11)
+                        //{
+                        UsedMonthly = lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee;
+                        LastCBM = expectedConsumptionModel.WaterPrice;
+                        LastHealth = expectedConsumptionModel.SewagePrice;
+                        LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
+                        LastFixFee = expectedConsumptionModel.Fixfee;
+                        //}
                     }
                 }
 
@@ -1875,8 +1887,8 @@ namespace MonthReadingRecalculation
                 var tarriffAdjustmentDiff = tarriffAdjustment - oldTarriffAdjustment;
 
                 // Update MonthReadings record
-                var updateMonthReadingsResult = UpdateMonthReadingData(MonthReadingId, UsedMonthly, consumptionAdjustment, tarriffAdjustment);
-                
+                var updateMonthReadingsResult = UpdateMonthReadingData(MonthReadingId, UsedMonthly, consumptionAdjustment, tarriffAdjustment, LastCBM, LastHealth, LastServiceBox, LastFixFee);
+
                 if (updateMonthReadingsResult > 0)
                 {
                     // Add MonthReadingConsumptionDiffs record
@@ -1954,8 +1966,6 @@ namespace MonthReadingRecalculation
                         }
                     }
                 }
-
-
             }
             catch
             {
@@ -1973,19 +1983,22 @@ namespace MonthReadingRecalculation
                                  " and  convert(datetime , serverDate, 103 ) < convert(datetime , '" + specificDate.ToString("dd/MM/yyyy") + "' , 103 ) order by Curdate desc ");
         }
 
-        public int UpdateMonthReadingData(int MonthReadingId, decimal UsedMonthly, decimal consumptionAdjustment,decimal tarriffAdjustment)
+        public int UpdateMonthReadingData(int MonthReadingId, decimal UsedMonthly, decimal consumptionAdjustment, decimal tarriffAdjustment, decimal LastCBM, decimal LastHealth, decimal LastServiceBox, decimal LastFixFee)
         {
             try
             {
-                return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadings with (ROWLOCK)  set [Read] = OldConsumption ,TotalConsumption = OldConsumption , ConsumptionMoney = '{UsedMonthly}' ,consumptionAdjustment = {consumptionAdjustment} ,tarriffAdjustment = {tarriffAdjustment} where ID = {MonthReadingId}");
+                return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadings with (ROWLOCK) set [Read] = OldConsumption ,TotalConsumption = OldConsumption , UsedMonthly = '{UsedMonthly}' ,ConsumptionMoney = '{UsedMonthly}' ,
+                                                                            consumptionAdjustment = {consumptionAdjustment} ,tarriffAdjustment = {tarriffAdjustment} , 
+                                                                            CBMPrice = {LastCBM},Healthy = {LastHealth} ,ServiceBox = {LastServiceBox} ,FixFee = {LastFixFee}
+                                                                            where ID = {MonthReadingId}");
             }
             catch
             {
                 return 0;
-            }          
+            }
         }
 
-        public int UpdateMonthReadingConsumptionDiff(int MonthReadingId, string MeterID, int Year, int Month,decimal OldConsumption,decimal NewConsumption,decimal oldTarriffAdjustment,decimal tarriffAdjustment,decimal oldConsumptionAdjustment,decimal consumptionAdjustment,decimal consumptionAdjustmentDiff,decimal tarriffAdjustmentDiff)
+        public int UpdateMonthReadingConsumptionDiff(int MonthReadingId, string MeterID, int Year, int Month, decimal OldConsumption, decimal NewConsumption, decimal oldTarriffAdjustment, decimal tarriffAdjustment, decimal oldConsumptionAdjustment, decimal consumptionAdjustment, decimal consumptionAdjustmentDiff, decimal tarriffAdjustmentDiff)
         {
             try
             {
