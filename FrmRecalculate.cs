@@ -991,6 +991,12 @@ namespace MonthReadingRecalculation
 
         public void ConnectDB()
         {
+            // Init DB
+            //textBox1.Text = ".\\MZSQLSERVER";
+            //textBox2.Text = "WaterMenoufiyaGMM";
+            //textBox3.Text = "sa";
+            //textBox4.Text = "P@$$w0rd";
+
             StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
             Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
             Con.Append(";Initial Catalog=" + textBox2.Text);
@@ -1752,19 +1758,19 @@ namespace MonthReadingRecalculation
                                 try
                                 {
                                     RecalcWaterMonthReadingsWithNewQuantity(
-                                          int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                          int.Parse(monthReadingList.Rows[i]["MonthReadingId"].ToString()),
                                           monthReadingList.Rows[i]["MeterID"].ToString(),
                                           monthReadingList.Rows[i]["ActivityID"].ToString(),
                                           int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
                                           int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
-                                          decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
-                                          decimal.Parse(monthReadingList.Rows[i]["OldConsumption"].ToString()),
+                                          decimal.Parse(monthReadingList.Rows[i]["NewRead"].ToString()),
+                                          decimal.Parse(monthReadingList.Rows[i]["NewRead"].ToString()),
                                           decimal.Parse(monthReadingList.Rows[i]["ConsumptionMoney"].ToString()),
                                           int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
                                           int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
                                           Convert.ToDecimal(monthReadingList.Rows[i]["consumptionAdjustment"]),
                                           Convert.ToDecimal(monthReadingList.Rows[i]["tarriffAdjustment"]),
-                                          Convert.ToDecimal(monthReadingList.Rows[i]["meterInstallment"])
+                                          0
                                           );
                                 }
                                 catch (Exception ex)
@@ -1860,11 +1866,11 @@ namespace MonthReadingRecalculation
                         // Set new consumption money
                         //if (meterType == 10 || meterType == 11)
                         //{
-                        UsedMonthly = lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee;
-                        LastCBM = expectedConsumptionModel.WaterPrice;
-                        LastHealth = expectedConsumptionModel.SewagePrice;
-                        LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
-                        LastFixFee = expectedConsumptionModel.Fixfee;
+                        //UsedMonthly = expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee;
+                        //LastCBM = expectedConsumptionModel.WaterPrice;
+                        //LastHealth = expectedConsumptionModel.SewagePrice;
+                        //LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
+                        //LastFixFee = expectedConsumptionModel.Fixfee;
                         //}
                     }
                 }
@@ -1874,10 +1880,12 @@ namespace MonthReadingRecalculation
                 {
                     if (lastChargeConsumptionModel != null)
                     {
+                        UsedMonthly = lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee + meterInstallment;
                         consumptionAdjustment = (lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee + meterInstallment) - UsedMonthly;
                     }
                     else
                     {
+                        UsedMonthly = expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee + meterInstallment;
                         consumptionAdjustment = (expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee + meterInstallment) - UsedMonthly;
                     }
                 }
@@ -1914,7 +1922,7 @@ namespace MonthReadingRecalculation
                                     monthrate = tarriffAdjustmentDiff / DefaultInstalmentsNumber;
                                 }
 
-                                AddAdjustment(MeterID, tarriffAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                                //AddAdjustment(MeterID, tarriffAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
                             }
                         }
                         else if (tarriffAdjustmentDiff < -(decimal)0.1)
@@ -1926,44 +1934,48 @@ namespace MonthReadingRecalculation
                                 var monthCount = 1;
                                 var monthrate = -tarriffAdjustmentDiff;
 
-                                AddAdjustment(MeterID, (-tarriffAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                                //AddAdjustment(MeterID, (-tarriffAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
                             }
                         }
 
-                        // Add adjustment: on difference used money (New meters only)
-                        if (consumptionAdjustmentDiff > (decimal)0.1)
-                        {
-                            var AddAdjustmentdt = PrepareAddAdjustment(10);
-                            decimal MaxInstalmentsAmount = decimal.Parse(AddAdjustmentdt.Rows[0]["MaxInstalmentsAmount"].ToString());
-                            int DefaultInstalmentsNumber = int.Parse(AddAdjustmentdt.Rows[0]["DefaultInstalmentsNumber"].ToString());
+                        //// Get different money consumption adjustment (New meters only)
+                        //if (meterType != 10 && meterType != 11)
+                        //{
+                        //    // Add adjustment: on difference used money (New meters only)
+                        //    if (consumptionAdjustmentDiff > (decimal)0.1)
+                        //    {
+                        //        var AddAdjustmentdt = PrepareAddAdjustment(10);
+                        //        decimal MaxInstalmentsAmount = decimal.Parse(AddAdjustmentdt.Rows[0]["MaxInstalmentsAmount"].ToString());
+                        //        int DefaultInstalmentsNumber = int.Parse(AddAdjustmentdt.Rows[0]["DefaultInstalmentsNumber"].ToString());
 
-                            if (AddAdjustmentdt.Rows.Count > 0)
-                            {
-                                var monthCount = 1;
-                                var monthrate = consumptionAdjustmentDiff;
+                        //        if (AddAdjustmentdt.Rows.Count > 0)
+                        //        {
+                        //            var monthCount = 1;
+                        //            var monthrate = consumptionAdjustmentDiff;
 
-                                if (consumptionAdjustmentDiff > MaxInstalmentsAmount && MaxInstalmentsAmount != 0)
-                                {
-                                    monthCount = DefaultInstalmentsNumber;
-                                    monthrate = consumptionAdjustmentDiff / DefaultInstalmentsNumber;
-                                }
+                        //            if (consumptionAdjustmentDiff > MaxInstalmentsAmount && MaxInstalmentsAmount != 0)
+                        //            {
+                        //                monthCount = DefaultInstalmentsNumber;
+                        //                monthrate = consumptionAdjustmentDiff / DefaultInstalmentsNumber;
+                        //            }
 
-                                AddAdjustment(MeterID, consumptionAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
-                            }
-                        }
-                        else if (consumptionAdjustmentDiff < -(decimal)0.1)
-                        {
+                        //            //AddAdjustment(MeterID, consumptionAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                        //        }
+                        //    }
+                        //    else if (consumptionAdjustmentDiff < -(decimal)0.1)
+                        //    {
 
-                            var AddAdjustmentdt = PrepareAddAdjustment(16);
+                        //        var AddAdjustmentdt = PrepareAddAdjustment(16);
 
-                            if (AddAdjustmentdt.Rows.Count > 0)
-                            {
-                                var monthCount = 1;
-                                var monthrate = -consumptionAdjustmentDiff;
+                        //        if (AddAdjustmentdt.Rows.Count > 0)
+                        //        {
+                        //            var monthCount = 1;
+                        //            var monthrate = -consumptionAdjustmentDiff;
 
-                                AddAdjustment(MeterID, (-consumptionAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
-                            }
-                        }
+                        //            //AddAdjustment(MeterID, (-consumptionAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                        //        }
+                        //    }
+                        //}
                     }
                 }
             }
@@ -1999,10 +2011,15 @@ namespace MonthReadingRecalculation
         {
             try
             {
-                return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadings with (ROWLOCK) set [Read] = OldConsumption ,TotalConsumption = OldConsumption , UsedMonthly = '{UsedMonthly}' ,ConsumptionMoney = '{UsedMonthly}' ,
-                                                                            consumptionAdjustment = {consumptionAdjustment} ,tarriffAdjustment = {tarriffAdjustment} , 
-                                                                            CBMPrice = {LastCBM},Healthy = {LastHealth} ,ServiceBox = {LastServiceBox} ,FixFee = {LastFixFee}
-                                                                            where ID = {MonthReadingId}");
+                //return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadings with (ROWLOCK) set [Read] = OldConsumption ,TotalConsumption = OldConsumption , UsedMonthly = '{UsedMonthly}' ,ConsumptionMoney = '{UsedMonthly}' ,
+                //                                                            consumptionAdjustment = {consumptionAdjustment} ,tarriffAdjustment = {tarriffAdjustment} , 
+                //                                                            CBMPrice = {LastCBM},Healthy = {LastHealth} ,ServiceBox = {LastServiceBox} ,FixFee = {LastFixFee}
+                //                                                            where ID = {MonthReadingId}");
+
+                return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadingsFixHistory with (ROWLOCK) set NewConsumptionMoney = '{UsedMonthly}',NewUsedMonthly = {UsedMonthly} ,
+                                                                            NewconsumptionAdjustment = {consumptionAdjustment} ,NewTarriffAdjustment = {tarriffAdjustment} , 
+                                                                            NewCBMPrice = {LastCBM},NewHealthy = {LastHealth} ,NewServiceBox = {LastServiceBox} ,NewFixFee = {LastFixFee}
+                                                                            where MonthReadingId = {MonthReadingId}");
             }
             catch
             {
@@ -2229,7 +2246,7 @@ namespace MonthReadingRecalculation
         /// <param name="meterCurrentDate">Reading date</param>
         /// <param name="MonthQuantity">Month reading array</param>
         /// <returns>Add result</returns>
-        public bool fixOldConsumptions(int MonthReadingId, string MeterID, DateTime meterCurrentDate, decimal [] MonthQuantity)
+        public bool fixOldConsumptions(int MonthReadingId, string MeterID, DateTime meterCurrentDate, decimal[] MonthQuantity)
         {
             // Get last success charge server version details
             var softwareVersionDetails = GetMeterLastSuccessChargeVersion(MeterID);

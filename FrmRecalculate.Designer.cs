@@ -84,14 +84,14 @@ namespace MonthReadingRecalculation
             this.FixSewageBtn = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.CorrectReadingQuantity = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.RecalcQuantityProgressLbl = new System.Windows.Forms.Label();
             this.RecalcQuantityResultTxt = new System.Windows.Forms.RichTextBox();
             this.RecalcQuantityProgressBar = new System.Windows.Forms.ProgressBar();
             this.RecalcQuantityQueryTxt = new System.Windows.Forms.RichTextBox();
             this.RecalcQuantityBtn = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
@@ -640,6 +640,26 @@ namespace MonthReadingRecalculation
             this.CorrectReadingQuantity.Text = "CorrectReadingQuantity";
             this.CorrectReadingQuantity.UseVisualStyleBackColor = true;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(745, 100);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(261, 30);
+            this.button2.TabIndex = 51;
+            this.button2.Text = "Update old consumption";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(745, 55);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(261, 30);
+            this.button1.TabIndex = 50;
+            this.button1.Text = "Restart old consumption";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // RecalcQuantityProgressLbl
             // 
             this.RecalcQuantityProgressLbl.AutoSize = true;
@@ -689,27 +709,7 @@ namespace MonthReadingRecalculation
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(777, 25);
             this.label11.TabIndex = 45;
-            this.label11.Text = "Recalculate month readings with new quantity updated by UAMM";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(745, 55);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(261, 30);
-            this.button1.TabIndex = 50;
-            this.button1.Text = "Restart old consumption";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(745, 100);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(261, 30);
-            this.button2.TabIndex = 51;
-            this.button2.Text = "Update old consumption";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.label11.Text = "Fix and recalculate wrong month readings ";
             // 
             // FrmRecalculate
             // 
