@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace MonthReadingRecalculation
@@ -13,137 +11,50 @@ namespace MonthReadingRecalculation
     {
         public string connectionString = "";
         private BackgroundWorker worker;
+        delegate void SetTextCallback(string text, bool append = false);
 
         public FrmRecalculate()
         {
             InitializeComponent();
         }
 
-        delegate void SetTextCallback(string text, bool append = false);
+        #region Recalculate month readings
 
-        private void SetRichTextBox2Text(string text, bool append = false)
+        private void SetRecalculateResultTxt(string text, bool append = false)
         {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
-            if (this.richTextBox2.InvokeRequired)
+            if (this.RecalculateResultTxt.InvokeRequired)
             {
-                SetTextCallback d = new SetTextCallback(SetRichTextBox2Text);
+                SetTextCallback d = new SetTextCallback(SetRecalculateResultTxt);
                 this.Invoke(d, new object[] { text, append });
             }
             else
             {
                 if (append)
                 {
-                    this.richTextBox2.AppendText(text);
+                    this.RecalculateResultTxt.AppendText(text);
                 }
                 else
                 {
-                    this.richTextBox2.Text = text;
+                    this.RecalculateResultTxt.Text = text;
                 }
             }
         }
 
-        #region Recalculate month readings
-        private void button1_Click_1(object sender, EventArgs e)
+        private void RecalculateBtn_Click(object sender, EventArgs e)
         {
             try
             {
+                RecalcProgressBar.Value = 0;
+                RecalcProgressBar.Step = 1;
+                RecalcProgressBar.Maximum = 0;
+                RecalculateResultTxt.Text = "";
+                RecalcProgressLbl.Text = "";
 
-                //char[] chactivity = "111".PadLeft(3, '0').ToCharArray();
-                //int meterSewage, meterGucode, meterActivity;
-                //var PhaseNo = int.Parse(chactivity[0].ToString());
-                //var activity = int.Parse(chactivity[1].ToString());
-                //var GUcode = int.Parse(chactivity[2].ToString());
-                //byte ActivityCodeinMeter = byte.Parse(activity.ToString());
-                //char[] meterstatebin;
-                //string resopn = "";
-                //string ValveStatus = "";
-                //int CloseValveReason;
-                //string Ans = Convert.ToString(144, 2);
-                //bool bValveStatus;
-
-                //Ans = Ans.PadLeft(16, '0');
-                //meterstatebin = Ans.ToCharArray();
-
-                //if (meterstatebin[0] == '1')
-                //{
-                //    resopn = " لتعطيل العداد بواسطة فنى ";
-                //    CloseValveReason = 1;
-                //}
-
-                //if (meterstatebin[1] == '1')
-                //{
-                //   // batresopn = batresopn = " حالة البطارية : لا يمكن استخدامها";
-                //  //  if (BatteryStatus == 0) BatteryStatus = 2;
-                //}
-
-                //if (meterstatebin[2] == '1')
-                //    resopn = "الرصيد المتبقى اقل من حد الفصل";
-
-                //if (meterstatebin[3] == '1') resopn = "استهلاك السماحية اكبر من حد السماحية ";
-
-                //if (meterstatebin[5] == '1' && meterstatebin[1] == '0')
-                //{
-                //   // batresopn = " حالة البطارية : ضعيفة من فضلك قم بتغيرها فى أسرع وقت";
-                //    //if (BatteryStatus == 0) BatteryStatus = 1;
-                //}
-
-                //if (meterstatebin[5] == '1' && meterstatebin[1] == '1')
-                //{
-                //   // batresopn = " حالة البطارية : ضعيفة لا يمكن استخدامها";
-                //  //  if (BatteryStatus == 2) BatteryStatus = 3;
-                //}
-
-                //if (meterstatebin[6] == '1') resopn = "meter's OverdraftCredit >0 ";
-
-                //if (meterstatebin[7] == '1' || meterstatebin[2] == '1')
-                //{
-                //    resopn = " بسبب صفر الرصيد ";
-                //    CloseValveReason = 2;
-                //}
-
-                //if (meterstatebin[12] == '1')
-                //{
-                //    resopn = " لفتح الغطاء ";
-                //    bValveStatus = true;
-                //    CloseValveReason = 3;
-                //}
-
-                //if (meterstatebin[11] == '0')
-                //{
-                //    bValveStatus = true;
-
-                //  //  if (Multilingual.BaseForm.ApplicationLanguage.Contains("Arabic"))
-                //        ValveStatus = " حالة المحبس : مغلق  " + " ---- " + resopn;
-                //    //else
-                //    //    ValveStatus = "Valve status : Closed ";
-                //}
-                //else
-                //{
-                //    bValveStatus = false;
-
-                //    //if (Multilingual.BaseForm.ApplicationLanguage.Contains("Arabic"))
-                //        ValveStatus = "حالة المحبس : مفتوح ";
-                //    //else
-                //    //    ValveStatus = "Valve status : Open ";
-                //}
-
-
-
-                progressBar1.Value = 0;
-                progressBar1.Step = 1;
-                progressBar1.Maximum = 0;
-                richTextBox2.Text = "";
-                SetRichTextBox2Text("");
-                label9.Text = "";
-                StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
-                Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
-                Con.Append(";Initial Catalog=" + textBox2.Text);
-                Con.Append(";Data Source=" + textBox1.Text + ";");
-                this.connectionString = Con.ToString();
-
-                RecalculateMonthReading(richTextBox1.Text, checkBox1.Checked);
+                ConnectDB();
+                RecalculateMonthReading(RecalcQueryTxt.Text, IncudeEstidamaCkBx.Checked);
             }
             catch
             {
@@ -154,77 +65,73 @@ namespace MonthReadingRecalculation
         /// Recalculate water meter month readings based on table query  using threads
         /// </summary>
         /// <param name="MonthReadingQuery">Month reading query</param>
-        public void RecalculateMonthReadingThreading(string MonthReadingQuery, bool IncludeEstidama = false)
+        public void RecalculateMonthReading(string MonthReadingQuery, bool IncludeEstidama = false)
         {
-            DataTable monthReadingList = GetMonthReadingNeedCalculation(MonthReadingQuery);
+            DataTable monthReadingList = ExecuteSelectQuery(MonthReadingQuery);
 
             if (monthReadingList != null && monthReadingList.Rows.Count > 0)
             {
-                label9.Text = monthReadingList.Rows.Count.ToString();
+                RecalcProgressLbl.Text = monthReadingList.Rows.Count.ToString();
                 worker = new BackgroundWorker();
-                Thread _thread = null;
                 worker.WorkerReportsProgress = true;
-                progressBar1.Value = 0;
-                progressBar1.Step = 1;
-                progressBar1.Maximum = monthReadingList.Rows.Count;
-                label9.Text = string.Format("{0} records Completed", progressBar1.Value);
+                RecalcProgressBar.Value = 0;
+                RecalcProgressBar.Step = 1;
+                RecalcProgressBar.Maximum = monthReadingList.Rows.Count;
+                RecalcProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcProgressBar.Value, RecalcProgressBar.Maximum);
 
                 worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
                 {
-                    for (int i = 0; i < monthReadingList.Rows.Count; i++)
+                    for (int t = 0; t < monthReadingList.Rows.Count; t++)
                     {
+                        var i = t;
+
                         try
                         {
-                            worker.ReportProgress(i);
+                            worker.ReportProgress(t);
 
                             // Log data before 
-                            SetRichTextBox2Text("--------------------------------------------" + System.Environment.NewLine, true);
-                            //richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                            SetRichTextBox2Text("Start recalculate ID:" + monthReadingList.Rows[i]["ID"].ToString() +
-                                                    "- MeterID:" + monthReadingList.Rows[i]["MeterID"].ToString() +
-                                                    "- ActivityID:" + monthReadingList.Rows[i]["ActivityID"].ToString() +
-                                                    "- Year:" + monthReadingList.Rows[i]["Year"].ToString() +
-                                                    "- Month:" + monthReadingList.Rows[i]["Month"].ToString() +
-                                                    "- Read:" + monthReadingList.Rows[i]["Read"].ToString() +
-                                                    "- PhaseNo:" + monthReadingList.Rows[i]["PhaseNo"].ToString() +
-                                                    "- GuCode:" + monthReadingList.Rows[i]["GuCode"].ToString() +
-                                                    "- ConsumptionMoney:" + monthReadingList.Rows[i]["ConsumptionMoney"].ToString() +
-                                                    "- CBMPrice:" + monthReadingList.Rows[i]["CBMPrice"].ToString() +
-                                                    "- Healthy:" + monthReadingList.Rows[i]["Healthy"].ToString() +
-                                                    "- ServiceBox:" + monthReadingList.Rows[i]["ServiceBox"].ToString() +
-                                                    "- FixFee:" + monthReadingList.Rows[i]["FixFee"].ToString() +
-                                                    "- MeterFixFee:" + monthReadingList.Rows[i]["MeterFixFee"].ToString() + System.Environment.NewLine
-                                , true);
+                            //SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetRecalculateResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                            //                        "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                            //                        "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                        "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                            //                        "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                            //                        "- Read:" + monthReadingList.Rows[t]["Read"].ToString() +
+                            //                        "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                        "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() +
+                            //                        "- ConsumptionMoney:" + monthReadingList.Rows[t]["ConsumptionMoney"].ToString() +
+                            //                        "- CBMPrice:" + monthReadingList.Rows[t]["CBMPrice"].ToString() +
+                            //                        "- Healthy:" + monthReadingList.Rows[t]["Healthy"].ToString() +
+                            //                        "- ServiceBox:" + monthReadingList.Rows[t]["ServiceBox"].ToString() +
+                            //                        "- FixFee:" + monthReadingList.Rows[t]["FixFee"].ToString() +
+                            //                        "- MeterFixFee:" + monthReadingList.Rows[t]["MeterFixFee"].ToString() + System.Environment.NewLine
+                            //    , true);
 
-                            //richTextBox2.AppendText("Start recalculate ID:" + monthReadingList.Rows[i]["ID"].ToString() +
-                            //                        "- MeterID:" + monthReadingList.Rows[i]["MeterID"].ToString() +
-                            //                        "- ActivityID:" + monthReadingList.Rows[i]["ActivityID"].ToString() +
-                            //                        "- Year:" + monthReadingList.Rows[i]["Year"].ToString() +
-                            //                        "- Month:" + monthReadingList.Rows[i]["Month"].ToString() +
-                            //                        "- Read:" + monthReadingList.Rows[i]["Read"].ToString() +
-                            //                        "- PhaseNo:" + monthReadingList.Rows[i]["PhaseNo"].ToString() +
-                            //                        "- GuCode:" + monthReadingList.Rows[i]["GuCode"].ToString() +
-                            //                        "- ConsumptionMoney:" + monthReadingList.Rows[i]["ConsumptionMoney"].ToString() +
-                            //                        "- CBMPrice:" + monthReadingList.Rows[i]["CBMPrice"].ToString() +
-                            //                        "- Healthy:" + monthReadingList.Rows[i]["Healthy"].ToString() +
-                            //                        "- ServiceBox:" + monthReadingList.Rows[i]["ServiceBox"].ToString() +
-                            //                        "- FixFee:" + monthReadingList.Rows[i]["FixFee"].ToString() +
-                            //                        "- MeterFixFee:" + monthReadingList.Rows[i]["MeterFixFee"].ToString() + System.Environment.NewLine);
+                            if (i < monthReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    //_thread = new Thread(() => 
+                                    RecalculateWaterMonthReadings(
+                                     int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                     monthReadingList.Rows[i]["MeterID"].ToString(),
+                                     int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
+                                     int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
+                                     decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
+                                     monthReadingList.Rows[i]["ActivityID"].ToString(),
+                                     int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
+                                     int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
+                                     decimal.Parse(monthReadingList.Rows[i]["meterFixFee"].ToString()),
+                                     IncludeEstidama
+                                     );
+                                    // );
 
-                            _thread = new Thread(() => RecalculateWaterMonthReadings(
-                                int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
-                                monthReadingList.Rows[i]["MeterID"].ToString(),
-                                int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
-                                int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
-                                decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
-                                monthReadingList.Rows[i]["ActivityID"].ToString(),
-                                int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
-                                int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
-                                decimal.Parse(monthReadingList.Rows[i]["meterFixFee"].ToString()),
-                                IncludeEstidama
-                                ));
-                            _thread.Start();
-                            Thread.Sleep(1000);
+                                    // _thread.Start();
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -237,96 +144,19 @@ namespace MonthReadingRecalculation
                 worker.ProgressChanged += new ProgressChangedEventHandler(
                 delegate (object o, ProgressChangedEventArgs args)
                 {
-                    progressBar1.PerformStep();
-                    label9.Text = string.Format("{0} records Completed", progressBar1.Value);
+                    RecalcProgressBar.PerformStep();
+                    RecalcProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcProgressBar.Value, RecalcProgressBar.Maximum);
                 });
 
                 // Handle complete
                 worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
                 worker.RunWorkerAsync();
-
-
-                //foreach (DataRow dr in monthReadingList.Rows)
-                //{
-                //    // Log data before 
-                //    richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                //    richTextBox2.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
-                //                            "- MeterID:" + dr["MeterID"].ToString() +
-                //                            "- ActivityID:" + dr["ActivityID"].ToString() +
-                //                            "- Year:" + dr["Year"].ToString() +
-                //                            "- Month:" + dr["Month"].ToString() +
-                //                            "- Read:" + dr["Read"].ToString() +
-                //                            "- PhaseNo:" + dr["PhaseNo"].ToString() +
-                //                            "- GuCode:" + dr["GuCode"].ToString() +
-                //                            "- ConsumptionMoney:" + dr["ConsumptionMoney"].ToString() +
-                //                            "- CBMPrice:" + dr["CBMPrice"].ToString() +
-                //                            "- Healthy:" + dr["Healthy"].ToString() +
-                //                            "- ServiceBox:" + dr["ServiceBox"].ToString() +
-                //                            "- FixFee:" + dr["FixFee"].ToString() +
-                //                            "- MeterFixFee:" + dr["MeterFixFee"].ToString() + System.Environment.NewLine);
-
-                //    RecalculateWaterMonthReadings(
-                //        int.Parse(dr["ID"].ToString()),
-                //        dr["MeterID"].ToString(),
-                //        int.Parse(dr["Year"].ToString()),
-                //        int.Parse(dr["Month"].ToString()),
-                //        decimal.Parse(dr["Read"].ToString()),
-                //        dr["ActivityID"].ToString(),
-                //        int.Parse(dr["PhaseNo"].ToString()),
-                //        int.Parse(dr["GuCode"].ToString()),
-                //        decimal.Parse(dr["meterFixFee"].ToString()),
-                //        IncludeEstidama);
-                //}
             }
             else
             {
-                progressBar1.Value = 0;
-                progressBar1.Step = 1;
-                progressBar1.Maximum = 0;
-            }
-        }
-
-        /// <summary>
-        /// Recalculate water meter month readings based on table query  without threads
-        /// </summary>
-        /// <param name="MonthReadingQuery">Month reading query</param>
-        public void RecalculateMonthReading(string MonthReadingQuery, bool IncludeEstidama = false)
-        {
-            DataTable monthReadingList = GetMonthReadingNeedCalculation(MonthReadingQuery);
-
-            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
-            {
-                foreach (DataRow dr in monthReadingList.Rows)
-                {
-                    // Log data before 
-                    richTextBox2.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox2.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
-                                            "- MeterID:" + dr["MeterID"].ToString() +
-                                            "- ActivityID:" + dr["ActivityID"].ToString() +
-                                            "- Year:" + dr["Year"].ToString() +
-                                            "- Month:" + dr["Month"].ToString() +
-                                            "- Read:" + dr["Read"].ToString() +
-                                            "- PhaseNo:" + dr["PhaseNo"].ToString() +
-                                            "- GuCode:" + dr["GuCode"].ToString() +
-                                            "- ConsumptionMoney:" + dr["ConsumptionMoney"].ToString() +
-                                            "- CBMPrice:" + dr["CBMPrice"].ToString() +
-                                            "- Healthy:" + dr["Healthy"].ToString() +
-                                            "- ServiceBox:" + dr["ServiceBox"].ToString() +
-                                            "- FixFee:" + dr["FixFee"].ToString() +
-                                            "- MeterFixFee:" + dr["MeterFixFee"].ToString() + System.Environment.NewLine);
-
-                    RecalculateWaterMonthReadings(
-                        int.Parse(dr["ID"].ToString()),
-                        dr["MeterID"].ToString(),
-                        int.Parse(dr["Year"].ToString()),
-                        int.Parse(dr["Month"].ToString()),
-                        decimal.Parse(dr["Read"].ToString()),
-                        dr["ActivityID"].ToString(),
-                        int.Parse(dr["PhaseNo"].ToString()),
-                        int.Parse(dr["GuCode"].ToString()),
-                        decimal.Parse(dr["meterFixFee"].ToString()),
-                        IncludeEstidama);
-                }
+                RecalcProgressBar.Value = 0;
+                RecalcProgressBar.Step = 1;
+                RecalcProgressBar.Maximum = 0;
             }
         }
 
@@ -339,7 +169,6 @@ namespace MonthReadingRecalculation
         {
             MessageBox.Show("Finished!");
         }
-
 
         /// <summary>
         /// Recalculate water meter month readings
@@ -365,25 +194,17 @@ namespace MonthReadingRecalculation
                 decimal SewagePrice = 0;
 
                 // Check meter change requests by date (any changes in: activity, department , gucode, phase no)
-                var monthDate = new System.DateTime(Year, Month, 1);
-                var meterDate = GetMeterChangesByDate(MeterID, monthDate);
-
-                // get new activity instead of meter current activity
-                if (meterDate != null && meterDate.Rows.Count > 0)
-                {
-                    ActivityID = meterDate.Rows[0]["ActivityId"].ToString();
-                    meterUnits = int.Parse(meterDate.Rows[0]["GuCode"].ToString());
-                    sewage = int.Parse(meterDate.Rows[0]["PhaseNo"].ToString());
-                }
-
-                // Get activity estidama
-                decimal FixFee = GetMeterEstidamaByActivityID(MeterID, ActivityID, meterUnits, monthDate.AddMonths(1).AddDays(-1));
+                var monthDate = new DateTime(Year, Month, 1);
+                //var meterDate = GetMeterChangesByDate(MeterID, monthDate);
 
                 // Get activity tariff
                 var meterTarrifa = GetTariff(ActivityID, monthDate.AddMonths(1).AddDays(-1));
 
                 // Get reading stair details
                 var priceResult = calcTariffStairsDetails(TotalReading, meterTarrifa, meterUnits, sewage);
+
+                // Get activity estidama
+                decimal FixFee = GetMeterEstidamaByActivityID(MeterID, ActivityID, meterUnits, Convert.ToDateTime(meterTarrifa.Rows[0]["StartDate"].ToString()), TotalReading); // monthDate.AddMonths(1).AddDays(-1)
 
                 for (int i = 0; i < priceResult.GetLength(0); i++)
                 {
@@ -405,126 +226,38 @@ namespace MonthReadingRecalculation
                 // Log data after
                 if (res)
                 {
-                    SetRichTextBox2Text(
-                                        "End recalculate   ID:" + MonthReadingID +
-                                        "- MeterID:" + MeterID +
-                                        "- ActivityID:" + ActivityID +
-                                        "- Year:" + Year +
-                                        "- Month:" + Month +
-                                        "- Read:" + TotalReading +
-                                        "- PhaseNo:" + sewage +
-                                        "- GuCode:" + meterUnits +
-                                        "- ConsumptionMoney:" + TotalPrice.ToString("F3") +
-                                        "- CBMPrice:" + WaterPrice.ToString("F3") +
-                                        "- Healthy:" + SewagePrice.ToString("F3") +
-                                        "- ServiceBox:" + ServiceBoxWithTax.ToString("F3") +
-                                        "- FixFee:" + FixFee +
-                                        "- MeterFixFee:" + MeterFixFee +
-                                        System.Environment.NewLine, true);
+                    //SetRecalculateResultTxt(
+                    //                    "End recalculate   ID:" + MonthReadingID +
+                    //                    "- MeterID:" + MeterID +
+                    //                    "- ActivityID:" + ActivityID +
+                    //                    "- Year:" + Year +
+                    //                    "- Month:" + Month +
+                    //                    "- Read:" + TotalReading +
+                    //                    "- PhaseNo:" + sewage +
+                    //                    "- GuCode:" + meterUnits +
+                    //                    "- ConsumptionMoney:" + TotalPrice.ToString("F3") +
+                    //                    "- CBMPrice:" + WaterPrice.ToString("F3") +
+                    //                    "- Healthy:" + SewagePrice.ToString("F3") +
+                    //                    "- ServiceBox:" + ServiceBoxWithTax.ToString("F3") +
+                    //                    "- FixFee:" + FixFee +
+                    //                    "- MeterFixFee:" + MeterFixFee +
+                    //                    System.Environment.NewLine, true);
+                    //SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+
                 }
                 else
                 {
-                    SetRichTextBox2Text("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                    SetRecalculateResultTxt("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                    SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
                 }
             }
             catch
             {
-                SetRichTextBox2Text("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                SetRecalculateResultTxt("fail to update ID:" + MonthReadingID + System.Environment.NewLine, true);
+                SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Get Month Reading Need Calculation
-        /// </summary>
-        /// <param name="MonthReadingQuery">Month reading query</param>
-        /// <returns>List of month readings need calculation</returns>
-        public DataTable GetMonthReadingNeedCalculation(string MonthReadingQuery)
-        {
-            try
-            {
-                return new dboperation(connectionString).SelectData(MonthReadingQuery);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///  Get meter change request in specific date
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        /// <param name="SpecificDate">Specific date</param>
-        public DataTable GetMeterChangesByDate(string meterID, System.DateTime SpecificDate)
-        {
-            try
-            {
-                string sql = " select top 1 ActivityId , DepartmentId , GuCode , PhaseNo from [dbo].[MeterChangeRequest] where [MeterId] = '" + meterID + "' and [IsApplied] = 1 " +
-                             " and CONVERT(datetime, ApplyDate, 101) <= CONVERT(datetime, '" + SpecificDate.ToString("yyyy-MM-dd") + "' , 101 )" +
-                             " order by ApplyDate desc";
-                return new dboperation(connectionString).SelectData(sql);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///  Get meter details
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        public DataTable GetMeterDetails(string meterID)
-        {
-            try
-            {
-                string sql = " select top 1 ActivityID , GuCode , PhaseNo from [dbo].[Meters] where [MeterId] = '" + meterID + "'";
-                return new dboperation(connectionString).SelectData(sql);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///  Get meter audit details
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        /// <param name="SpecificDate">Specific date</param>
-        /// <param name="fieldName">fieldName ex: ActivityID,PhaseNo,UnitNo</param>
-        public string GetMeterAuditDetails(string meterID, System.DateTime SpecificDate, string fieldName)
-        {
-            try
-            {
-                string sql = " select top 1 fieldNewValue from meteraudit where meetrid = '" + meterID + "'" +
-                             " and CONVERT(datetime, changeDate, 101)  < CONVERT(datetime, '" + SpecificDate.ToString("yyyy-MM-dd") + "' , 101 ) and fieldname = '" + fieldName + "' order by changeDate desc";
-                return new dboperation(connectionString).ReturnStr(sql);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///  Get meter details
-        /// </summary>
-        /// <param name="meterID">Meter identifier</param>
-        /// <param name="SpecificDate">Specific date</param>
-        public DataTable GetLastWaterMeterReadingDetails(string meterID, System.DateTime SpecificDate)
-        {
-            try
-            {
-                string sql = " select top 1 ActivityID , GuCode , Sewage from [dbo].[WaterMetersReadings] where [MeterId] = '" + meterID + "' and CONVERT(datetime, serverDate, 101)  < CONVERT(datetime, '" + SpecificDate.AddMonths(1).ToString("yyyy-MM-dd") + "' , 101 ) order by serverDate desc";
-                return new dboperation(connectionString).SelectData(sql);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -533,17 +266,17 @@ namespace MonthReadingRecalculation
         /// <param name="ActivityID">Activity identifier</param>
         /// <param name="tarrifDate">Specific tarrif date</param>
         /// <returns>Tarriff details</returns>
-        public DataTable GetTariff(string ActivityID, System.DateTime? tarrifDate = null)
+        public DataTable GetTariff(string ActivityID, DateTime? tarrifDate = null)
         {
             try
             {
                 string sql = " SELECT ActivityID , StairID , StairTo , StairValue , Activities.alarmamt, Activities.dreditamt ,Activities.Name, InitialFees  ,SwgPercent,SwgPrice,PerMeterFees, (select top 1 tax from Settings) as tax , " +
-                             " CustomersServiceFees,IsCumulative,IsNoOfUnitsIncludedInCalc  , convert( datetime ,  StartDate , 103 ) as StartDate , StepSwgPrice,IsStepSwgPrice, " +
-                             " MinimumFee, MaximumFee, Activities.CurrencyRatio  ,  StairID AS [From],StairTo AS [To], StairValue AS Value,MonthFeesOptionId,MonthStepFees, " +
-                             " Activities.Stair , Healthy , PerMeterFees as ServiceBox  , isnull( exceptionvalue , 0 ) as exceptionvalue  " +
-                             " FROM TariffDetails  inner join Activities on Activities.ID  = TariffDetails.ActivityID   " +
-                             " WHERE (TariffDetails.StartDate = (SELECT MAX(CONVERT(datetime, tt.startdate, 101)) " +
-                             " FROM tariffdetails tt WHERE ";
+                               " CustomersServiceFees,IsCumulative,IsNoOfUnitsIncludedInCalc  , convert( datetime ,  StartDate , 103 ) as StartDate , StepSwgPrice,IsStepSwgPrice, " +
+                               " MinimumFee, MaximumFee, Activities.CurrencyRatio  ,  StairID AS [From],StairTo AS [To], StairValue AS Value,MonthFeesOptionId,MonthStepFees, " +
+                               " Activities.Stair , Healthy , PerMeterFees as ServiceBox  , isnull( exceptionvalue , 0 ) as exceptionvalue , ClosedMeterMonthFees ,IsMonthStepFeesCumulative,TariffDetails.id as tariffId " +
+                               " FROM TariffDetails  inner join Activities on Activities.ID  = TariffDetails.ActivityID   " +
+                               " WHERE (TariffDetails.StartDate = (SELECT MAX(CONVERT(datetime, tt.startdate, 101)) " +
+                               " FROM tariffdetails tt WHERE ";
 
                 if (tarrifDate == null)
                 {
@@ -559,6 +292,96 @@ namespace MonthReadingRecalculation
                 sql += " )) AND TariffDetails.ActivityID ='" + ActivityID + "'";
                 return new dboperation(connectionString).SelectData(sql);
             }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get stairs details
+        /// </summary>
+        /// <param name="stairs"> stairs details</param>
+        /// <returns>Row of stair details</returns>
+        private DataTable PrepareStairsDetails(decimal[,] stairs)
+        {
+            try
+            {
+                decimal ServiceBox = 0;
+                DataTable data = new DataTable();
+                DataRow row = data.NewRow();
+
+                for (int i = 1; i < 7; i++)
+                {
+                    data.Columns.Add("QuantityStair" + i);
+                    data.Columns.Add("WaterPrice" + i);
+                    data.Columns.Add("Heleathy" + i);
+                    data.Columns.Add("Price" + i);
+                }
+
+                data.Columns.Add("WService");
+
+                for (int j = 0; j < stairs.GetLength(0); j++)
+                {
+                    ServiceBox += stairs[j, 2];
+                }
+
+                row["WService"] = ServiceBox;
+
+                for (int i = 0; i < 6; i++)
+                {
+                    row["QuantityStair" + (i + 1)] = stairs[i, 0];
+                    row["WaterPrice" + (i + 1)] = stairs[i, 1];
+                    row["Heleathy" + (i + 1)] = stairs[i, 5];
+                    row["Price" + (i + 1)] = stairs[i, 6];
+                }
+
+                data.Rows.Add(row);
+                return data;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Return Consumption details for specific tarrif
+        /// </summary>
+        /// <param name="specificDate">Specific date</param>
+        /// <param name="ActivityID">Activity</param>
+        /// <param name="unitNo">Unit number</param>
+        /// <param name="sewage">Sewage</param>
+        /// <param name="reading">Quantity reading</param>
+        /// <param name="meterid">Meter identifier</param>
+        /// <returns></returns>
+        public ConsumptionModel GetSpecificDateConsumption(DateTime specificDate, string ActivityID, int unitNo, int sewage, decimal reading, string meterid, DataTable tariff = null)
+        {
+            try
+            {
+                var result = new ConsumptionModel();
+
+                // Get activity tariff and stairs (Calculate based on system meter data)
+                result.Tarrifa = tariff ?? GetTariff(ActivityID, specificDate);
+                result.PriceResult = calcTariffStairsDetails(reading, result.Tarrifa, unitNo, sewage);
+                result.Stairs = PrepareStairsDetails(result.PriceResult);
+
+                // Get activity estidama
+                result.Fixfee = GetMeterEstidamaByActivityID(meterid, ActivityID, unitNo, Convert.ToDateTime(result.Tarrifa.Rows[0]["StartDate"]), reading);
+
+                result.tarrifId = int.Parse(result.Tarrifa.Rows[0]["tariffId"]?.ToString());
+                result.tarrifStartDate = Convert.ToDateTime(result.Tarrifa.Rows[0]["StartDate"]?.ToString());
+
+                for (int i = 0; i < result.PriceResult.GetLength(0); i++)
+                {
+                    result.WaterPrice += result.PriceResult[i, 1];
+                    result.ServiceBoxWithTax += result.PriceResult[i, 2];
+                    result.SewagePrice += result.PriceResult[i, 5];
+                    result.TotalPrice = result.PriceResult[i, 6] != 0 ? result.PriceResult[i, 6] : result.TotalPrice;
+                }
+
+                return result;
+            }
             catch (Exception ex)
             {
                 return null;
@@ -572,17 +395,15 @@ namespace MonthReadingRecalculation
         /// <param name="activityID">Activity ididentifierparam>
         /// <param name="UnitNo">Unit no</param>
         /// <returns>Meter fixed fee values</returns>
-        public decimal GetMeterEstidamaByActivityID(string meterID, string activityID, int UnitNo, System.DateTime tarriffDate)
+        public decimal GetMeterEstidamaByActivityID(string meterID, string activityID, int UnitNo, DateTime tarriffDate, decimal quantity)
         {
             try
             {
-                var query = "select [dbo].[GetActivityFixedFee] ('" + meterID + "','" + activityID + "','" + UnitNo + "','" + tarriffDate.ToString("yyyy-MM-dd") + "')"; // GetMeterFixedFee
-                var fixedFee = Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
-                return fixedFee;
+                var query = "select [dbo].[GetActivityFixedFeeWithConsumption] ('" + meterID + "','" + activityID + "','" + UnitNo + "','" + tarriffDate.ToString("yyyy-MM-dd") + "'," + quantity + ")"; // GetMeterFixedFee
+                return Convert.ToDecimal(new dboperation(connectionString).ReturnStr(query));
             }
-            catch (Exception ex)
+            catch
             {
-                //MakeExceptionLog("Utility", "GetMeterFixedFees", getDateTime().ToShortTimeString(), ex);
                 return 0;
             }
         }
@@ -597,22 +418,10 @@ namespace MonthReadingRecalculation
         /// <returns>Stairs details</returns>
         public decimal[,] calcTariffStairsDetails(decimal Quantity, DataTable dataTariff, int unitno, int sewage)
         {
-            bool IncludeUnitNo = false;
-            decimal from = 0;
-            decimal to = 0;
-            decimal Price = 0;
-            decimal Tax = 0;
-            decimal ServiceBox = 0;
-            decimal ServiceBoxWithTax = 0;
-            bool IsCumulative = false;
-            decimal SewagePrice = 0;
-            decimal SewagePercentage = 0;
-            decimal totalSewage = 0;
-
-            decimal waterPrice = 0;
-            decimal totalPrice = 0;
+            bool IncludeUnitNo, IsCumulative, IsStepSwgPrice = false;
+            decimal estidamaPerStair, from, to, Price, Tax, ServiceBox, ServiceBoxWithTax, SewagePrice, SewagePercentage, totalSewage, StepSwgPrice, waterPrice, totalPrice = 0;
             decimal allQuantity = Quantity;
-            decimal[,] stair = new decimal[dataTariff.Rows.Count, 7];
+            decimal[,] stair = new decimal[dataTariff.Rows.Count, 8];
 
             for (int i = 0; i < dataTariff.Rows.Count; i++)
             {
@@ -621,6 +430,7 @@ namespace MonthReadingRecalculation
 
                 from = Convert.ToDecimal(dataTariff.Rows[i]["from"].ToString());
                 to = Convert.ToDecimal(dataTariff.Rows[i]["to"].ToString());
+                estidamaPerStair = Convert.ToDecimal(dataTariff.Rows[i]["MonthStepFees"].ToString());
 
                 if (IncludeUnitNo)
                 {
@@ -628,24 +438,24 @@ namespace MonthReadingRecalculation
                     to = to * unitno;
                 }
 
-                Price = Convert.ToDecimal(dataTariff.Rows[i]["value"].ToString());
+                Price = Convert.ToDecimal(dataTariff.Rows[i]["value"]?.ToString());
 
                 // 2- Prepare service box
-                Tax = decimal.Parse(dataTariff.Rows[i]["tax"].ToString()) / 100;
-                ServiceBox = decimal.Parse(dataTariff.Rows[i]["ServiceBox"].ToString()) + decimal.Parse(dataTariff.Rows[i]["CustomersServiceFees"].ToString());
+                Tax = decimal.Parse(dataTariff.Rows[i]["tax"]?.ToString()) / 100;
+                ServiceBox = decimal.Parse(dataTariff.Rows[i]["ServiceBox"]?.ToString()) + decimal.Parse(dataTariff.Rows[i]["CustomersServiceFees"].ToString());
                 ServiceBoxWithTax = ServiceBox * (1 + Tax);
 
                 // 3- Prepare sewage price
                 if (sewage == 1)
                 {
-                    SewagePrice = Convert.ToDecimal(dataTariff.Rows[i]["SwgPrice"].ToString());
-                    SewagePercentage = Convert.ToDecimal(dataTariff.Rows[i]["SwgPercent"].ToString());
-                    totalSewage = SewagePrice > 0 ? (SewagePercentage * SewagePrice / 100) : (SewagePercentage * Price / 100);
+                    SewagePrice = Convert.ToDecimal(dataTariff.Rows[i]["SwgPrice"]?.ToString());
+                    SewagePercentage = Convert.ToDecimal(dataTariff.Rows[i]["SwgPercent"]?.ToString());
+                    IsStepSwgPrice = Convert.ToBoolean(dataTariff.Rows[i]["IsStepSwgPrice"]?.ToString());
+                    StepSwgPrice = Convert.ToDecimal(dataTariff.Rows[i]["StepSwgPrice"]?.ToString());
+                    totalSewage = (IsStepSwgPrice ? StepSwgPrice : (SewagePrice == 0 ? Price : SewagePrice)) * SewagePercentage / 100;
                 }
                 else
                 {
-                    SewagePrice = 0;
-                    SewagePercentage = 0;
                     totalSewage = 0;
                 }
 
@@ -653,8 +463,9 @@ namespace MonthReadingRecalculation
                 waterPrice = Price + ServiceBoxWithTax + totalSewage;
 
                 // 5- Prepare cumulative
-                IsCumulative = Convert.ToBoolean(dataTariff.Rows[i]["IsCumulative"].ToString());
+                IsCumulative = Convert.ToBoolean(dataTariff.Rows[i]["IsCumulative"]?.ToString());
 
+                // restart tarriff details
                 if (from == 0 && !IsCumulative)
                 {
                     from = 0;
@@ -670,32 +481,35 @@ namespace MonthReadingRecalculation
                         stair[j, 4] = 0; // Total tax إجمالى الضريبة
                         stair[j, 5] = 0; // Total sewage إجمالى ثمن الصرف
                         stair[j, 6] = 0; // Total price إجمالى الثمن الكلى
+                        stair[j, 7] = 0; // Estidama استدامة الشريحة
                     }
                 }
 
                 // Calculate stairs main prices
-                if (Quantity > to - from)
+                if (Quantity > to - from && i != dataTariff.Rows.Count - 1)
                 {
                     totalPrice += (to - from) * waterPrice;
                     Quantity = Quantity - (to - from);
                     stair[i, 0] = to - from;
                     stair[i, 1] = (to - from) * Price;
-                    stair[i, 2] = (to - from) * (decimal)ServiceBoxWithTax;
-                    stair[i, 3] = stair[i, 2] / (decimal)(1 + Tax);
-                    stair[i, 4] = stair[i, 3] * (decimal)Tax;
-                    stair[i, 5] = (to - from) * (decimal)totalSewage;
+                    stair[i, 2] = (to - from) * ServiceBoxWithTax;
+                    stair[i, 3] = stair[i, 2] / (1 + Tax);
+                    stair[i, 4] = stair[i, 3] * Tax;
+                    stair[i, 5] = (to - from) * totalSewage;
                     stair[i, 6] = totalPrice;
+                    stair[i, 7] = estidamaPerStair;
                 }
                 else
                 {
                     totalPrice += Quantity * waterPrice;
                     stair[i, 0] = Quantity;
                     stair[i, 1] = Quantity * Price;
-                    stair[i, 2] = Quantity * (decimal)ServiceBoxWithTax;
-                    stair[i, 3] = stair[i, 2] / (decimal)(1 + Tax);
-                    stair[i, 4] = stair[i, 3] * (decimal)Tax;
-                    stair[i, 5] = Quantity * (decimal)totalSewage;
+                    stair[i, 2] = Quantity * ServiceBoxWithTax;
+                    stair[i, 3] = stair[i, 2] / (1 + Tax);
+                    stair[i, 4] = stair[i, 3] * Tax;
+                    stair[i, 5] = Quantity * totalSewage;
                     stair[i, 6] = totalPrice;
+                    stair[i, 7] = estidamaPerStair;
                     break;
                 }
             }
@@ -748,34 +562,222 @@ namespace MonthReadingRecalculation
 
         #endregion
 
-        #region Cancel charges
+        #region Update month readings data
 
-        private void button2_Click(object sender, EventArgs e)
+        private void SetUpdateDataResultTxt(string text, bool append = false)
         {
-            StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
-            Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
-            Con.Append(";Initial Catalog=" + textBox2.Text);
-            Con.Append(";Data Source=" + textBox1.Text + ";");
-            this.connectionString = Con.ToString();
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.UpdateDataResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetUpdateDataResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.UpdateDataResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.UpdateDataResultTxt.Text = text;
+                }
+            }
+        }
 
-            CancelCharges(richTextBox3.Text);
+        private void UpdateMRDataBtn_Click(object sender, EventArgs e)
+        {
+            UpdateProgressBar.Value = 0;
+            UpdateProgressBar.Step = 1;
+            UpdateProgressBar.Maximum = 0;
+            UpdateDataResultTxt.Text = "";
+            UpdateProgressLbl.Text = "";
+
+            ConnectDB();
+            UpdateMonthReading(UpdateQueryTxt.Text);
         }
 
         /// <summary>
-        /// Get Charges need cancellation
+        /// Update water meter month readings based on table query
         /// </summary>
-        /// <param name="ChargesQuery">Charges query</param>
-        /// <returns>List of month readings need calculation</returns>
-        public DataTable GetChargesNeedCancellation(string ChargesQuery)
+        /// <param name="MonthReadingQuery">Month reading query</param>
+        public void UpdateMonthReading(string MonthReadingQuery)
+        {
+            DataTable monthReadingList = ExecuteSelectQuery(MonthReadingQuery);
+
+            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
+            {
+                UpdateProgressLbl.Text = monthReadingList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                UpdateProgressBar.Maximum = monthReadingList.Rows.Count;
+                UpdateProgressLbl.Text = string.Format("{0} records Completed from {1}", UpdateProgressBar.Value, UpdateProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < monthReadingList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            // Log data before 
+                            //SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetUpdateDataResultTxt("Start recalculate ID:" + monthReadingList.Rows[t]["ID"].ToString() +
+                            //                    "- MeterID:" + monthReadingList.Rows[t]["MeterID"].ToString() +
+                            //                    "- ActivityID:" + monthReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                    "- Year:" + monthReadingList.Rows[t]["Year"].ToString() +
+                            //                    "- Month:" + monthReadingList.Rows[t]["Month"].ToString() +
+                            //                    "- PhaseNo:" + monthReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                    "- GuCode:" + monthReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
+                            //    , true);
+
+                            if (i < monthReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()));
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    UpdateProgressBar.PerformStep();
+                    UpdateProgressLbl.Text = string.Format("{0} records Completed from {1}", UpdateProgressBar.Value, UpdateProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                UpdateProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update water meter month readings
+        /// </summary>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="Year">Reading year</param>
+        /// <param name="Month">Reading month from meter</param>
+        /// <param name="TotalReading">Total consumption Reading from meter</param>
+        /// <param name="UsedMonthly">Used Consuption Money Monthly</param>
+        /// <param name="FixFee">Fixed Fee from meter</param>
+        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="sewage">sewage</param> 
+        /// <param name="meterUnits">meterUnits</param> 
+        /// <param name="MeterVersionType">MeterVersionType</param> 
+        /// <returns>Add result</returns>
+        public bool UpdateWaterMonthReadings(int MonthReadingID)
         {
             try
             {
-                return new dboperation(connectionString).SelectData(ChargesQuery);
+                // Update month reading
+                var result = UpdateDbMonthReadingDetails(MonthReadingID);
+
+                //// Log data after
+                //SetUpdateDataResultTxt("End recalculate   ID:" + MonthReadingID + "- Result:" + result + System.Environment.NewLine, true);
+                //SetUpdateDataResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+
+                return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return null;
+                return false;
             }
+        }
+
+        /// <summary>
+        /// Update month readings details
+        /// </summary>
+        /// <param name="ID">Month reading identifier</param>
+        /// <returns>Bool indicator saved or not</returns>
+        public bool UpdateDbMonthReadingDetails(int ID)
+        {
+            try
+            {
+                dboperation db = new dboperation(connectionString);
+                db.objcmd.Parameters.Clear();
+                db.objcmd.CommandType = CommandType.StoredProcedure;
+                db.objcmd.CommandText = "UpdateMonthReadingData";
+                db.objcmd.Parameters.AddWithValue("@MonthReadingId", ID);
+                SqlParameter sqlResult = new SqlParameter("@ReturnVal", SqlDbType.Bit, 1);
+                sqlResult.Direction = ParameterDirection.Output;
+                db.objcmd.Parameters.Add(sqlResult);
+                db.ExecuteNonQuery("");
+
+                if (sqlResult.Value != null && (bool)sqlResult.Value == true) // Add month reading
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Cancel charges
+
+        private void SetCancelResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.CancelChargesResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetCancelResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.CancelChargesResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.CancelChargesResultTxt.Text = text;
+                }
+            }
+        }
+
+        private void CancelBtn_Click(object sender, EventArgs e)
+        {
+            CancelProgressBar.Value = 0;
+            CancelProgressBar.Step = 1;
+            CancelProgressBar.Maximum = 0;
+            CancelChargesResultTxt.Text = "";
+            CancelProgressLbl.Text = "";
+
+            ConnectDB();
+            CancelCharges(CancelChargesQueryTxt.Text);
         }
 
         /// <summary>
@@ -784,26 +786,78 @@ namespace MonthReadingRecalculation
         /// <param name="ChargesQuery">Charges query</param>
         public void CancelCharges(string ChargesQuery)
         {
-            DataTable chargesList = GetChargesNeedCancellation(ChargesQuery);
+            DataTable chargesList = ExecuteSelectQuery(ChargesQuery);
 
             if (chargesList != null && chargesList.Rows.Count > 0)
             {
-                foreach (DataRow dr in chargesList.Rows)
-                {
-                    // Log data before 
-                    richTextBox4.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox4.AppendText("Start cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
+                CancelProgressLbl.Text = chargesList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                CancelProgressBar.Value = 0;
+                CancelProgressBar.Step = 1;
+                CancelProgressBar.Maximum = chargesList.Rows.Count;
+                CancelProgressLbl.Text = string.Format("{0} records Completed from {1}", CancelProgressBar.Value, CancelProgressBar.Maximum);
 
-                    // Log data after
-                    if (CancelCharge(dr["SerialNo"].ToString()))
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+
+                    for (int t = 0; t < chargesList.Rows.Count; t++)
                     {
-                        richTextBox4.AppendText("End: Success to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            // Log data before 
+                            SetCancelResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            SetCancelResultTxt("Start cancel Charge serial number:" + chargesList.Rows[t]["SerialNo"].ToString() + System.Environment.NewLine, true);
+
+                            if (i < chargesList.Rows.Count)
+                            {
+                                try
+                                {
+                                    // Log data after
+                                    if (CancelCharge(chargesList.Rows[i]["SerialNo"].ToString()))
+                                    {
+                                        SetCancelResultTxt("End: Success to cancel Charge serial number:" + chargesList.Rows[i]["SerialNo"].ToString() + System.Environment.NewLine);
+                                        SetCancelResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                                    }
+                                    else
+                                    {
+                                        SetCancelResultTxt("End: Failed to cancel Charge serial number:" + chargesList.Rows[i]["SerialNo"].ToString() + System.Environment.NewLine, true);
+                                        SetCancelResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                                    }
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
                     }
-                    else
-                    {
-                        richTextBox4.AppendText("End: Failed to cancel Charge serial number:" + dr["SerialNo"].ToString() + System.Environment.NewLine);
-                    }
-                }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    CancelProgressBar.PerformStep();
+                    CancelProgressLbl.Text = string.Format("{0} records Completed  from {1}", CancelProgressBar.Value, CancelProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                CancelProgressBar.Value = 0;
+                CancelProgressBar.Step = 1;
+                CancelProgressBar.Maximum = 0;
             }
         }
 
@@ -933,59 +987,152 @@ namespace MonthReadingRecalculation
 
         #endregion
 
-        private void button4_Click(object sender, EventArgs e)
+        #region Shared
+
+        public void ConnectDB()
         {
-            label10.Text = "0";
-            richTextBox7.Text = "";
             StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
             Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
             Con.Append(";Initial Catalog=" + textBox2.Text);
-            Con.Append(";Data Source=" + textBox1.Text + ";");
+            Con.Append(";MultipleActiveResultSets=True;Max Pool Size=30000;Data Source=" + textBox1.Text + ";");
             this.connectionString = Con.ToString();
-
-            UpdateMonthReading(richTextBox6.Text);
         }
 
         /// <summary>
-        /// Update water meter month readings based on table query
+        /// Execute select query
         /// </summary>
-        /// <param name="MonthReadingQuery">Month reading query</param>
-        public void UpdateMonthReading(string MonthReadingQuery)
+        /// <param name="SelectQuery">Sql query</param>
+        /// <returns>Query result</returns>
+        public DataTable ExecuteSelectQuery(string SelectQuery)
         {
-            DataTable monthReadingList = GetMonthReadingNeedCalculation(MonthReadingQuery);
-            int counter = 0;
-
-            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
+            try
             {
-          
-                foreach (DataRow dr in monthReadingList.Rows)
+                return new dboperation(connectionString).SelectData(SelectQuery);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Update Read mass card readings
+
+        private void SetReviewCardResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.UpdateDataResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetReviewCardResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
                 {
-                    counter++;
-                    label10.Text = counter + "";
-
-                    // Log data before 
-                    richTextBox7.AppendText("--------------------------------------------" + System.Environment.NewLine);
-                    richTextBox7.AppendText("Start recalculate ID:" + dr["ID"].ToString() +
-                                            "- MeterID:" + dr["MeterID"].ToString() +
-                                            "- ActivityID:" + dr["ActivityID"].ToString() +
-                                            "- Year:" + dr["Year"].ToString() +
-                                            "- Month:" + dr["Month"].ToString() +
-                                            "- PhaseNo:" + dr["PhaseNo"].ToString() +
-                                            "- GuCode:" + dr["GuCode"].ToString() + System.Environment.NewLine);
-
-                    UpdateWaterMonthReadings(int.Parse(dr["ID"].ToString()),
-                        dr["MeterID"].ToString(),
-                        int.Parse(dr["Year"].ToString()),
-                        int.Parse(dr["Month"].ToString()),
-                        dr["ActivityID"].ToString(),
-                        int.Parse(dr["PhaseNo"].ToString()),
-                        int.Parse(dr["GuCode"].ToString()));
+                    this.ReviewCardResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.ReviewCardResultTxt.Text = text;
                 }
             }
         }
 
+        private void ReviewCardDataBtn_Click(object sender, EventArgs e)
+        {
+            ReviewCardProgressBar.Value = 0;
+            ReviewCardProgressBar.Step = 1;
+            ReviewCardProgressBar.Maximum = 0;
+            ReviewCardResultTxt.Text = "";
+            ReviewCardProgressLbl.Text = "";
+
+            ConnectDB();
+            ReviewCardMassCardReading(ReviewCardQueryTxt.Text);
+        }
+
         /// <summary>
-        /// Update water meter month readings
+        /// Update mass card readings based on table query
+        /// </summary>
+        /// <param name="MonthReadingQuery">Mass card reading query</param>
+        public void ReviewCardMassCardReading(string ReviewCardQuery)
+        {
+            DataTable cardReadingList = ExecuteSelectQuery(ReviewCardQuery);
+
+            if (cardReadingList != null && cardReadingList.Rows.Count > 0)
+            {
+                ReviewCardProgressLbl.Text = cardReadingList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                UpdateProgressBar.Value = 0;
+                UpdateProgressBar.Step = 1;
+                ReviewCardProgressBar.Maximum = cardReadingList.Rows.Count;
+                ReviewCardProgressLbl.Text = string.Format("{0} records Completed from {1}", ReviewCardProgressBar.Value, ReviewCardProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < cardReadingList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            // Log data before 
+                            //SetReviewCardResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+                            //SetReviewCardResultTxt("Start recalculate ID:" + cardReadingList.Rows[t]["ID"].ToString() +
+                            //                    "- MeterID:" + cardReadingList.Rows[t]["MeterID"].ToString() +
+                            //                    "- ActivityID:" + cardReadingList.Rows[t]["ActivityID"].ToString() +
+                            //                    "- Year:" + cardReadingList.Rows[t]["Year"].ToString() +
+                            //                    "- Month:" + cardReadingList.Rows[t]["Month"].ToString() +
+                            //                    "- PhaseNo:" + cardReadingList.Rows[t]["PhaseNo"].ToString() +
+                            //                    "- GuCode:" + cardReadingList.Rows[t]["GuCode"].ToString() + System.Environment.NewLine
+                            //    , true);
+
+                            if (i < cardReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    UpdateReviewCardReadings(int.Parse(cardReadingList.Rows[i]["ID"].ToString()));
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    ReviewCardProgressBar.PerformStep();
+                    ReviewCardProgressLbl.Text = string.Format("{0} records Completed from {1}", ReviewCardProgressBar.Value, ReviewCardProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                ReviewCardProgressBar.Value = 0;
+                ReviewCardProgressBar.Step = 1;
+                ReviewCardProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update mass card readings
         /// </summary>
         /// <param name="MeterID">Meter identifier</param>
         /// <param name="Year">Reading year</param>
@@ -998,68 +1145,16 @@ namespace MonthReadingRecalculation
         /// <param name="meterUnits">meterUnits</param> 
         /// <param name="MeterVersionType">MeterVersionType</param> 
         /// <returns>Add result</returns>
-        public bool UpdateWaterMonthReadings(int MonthReadingID, string MeterID, int Year, int Month, string ActivityID, int sewage, int meterUnits)
+        public bool UpdateReviewCardReadings(int CardReadingID)
         {
             try
             {
-                decimal TotalPrice = 0;
-                decimal ServiceBoxWithTax = 0;
-                decimal WaterPrice = 0;
-                decimal SewagePrice = 0;
+                // Update read mass retrieval card reading
+                var result = UpdateReviewCardDetails(CardReadingID);
 
-                // Check meter change requests by date (any changes in: activity, department , gucode, phase no)
-                var monthDate = new System.DateTime(Year, Month, 1);
-                var meterDate = GetMeterChangesByDate(MeterID, monthDate);
-
-                try
-                {
-                    // get new activity instead of meter current activity
-                    if (meterDate != null && meterDate.Rows.Count > 0)
-                    {
-                        ActivityID = meterDate.Rows[0]["ActivityId"].ToString();
-                        meterUnits = int.Parse(meterDate.Rows[0]["GuCode"].ToString());
-                        sewage = int.Parse(meterDate.Rows[0]["PhaseNo"].ToString());
-                    }
-                    else
-                    {
-                        // medter audit
-                        var wMeterReading = GetLastWaterMeterReadingDetails(MeterID, monthDate);
-
-                        if (wMeterReading != null && wMeterReading.Rows.Count > 0)
-                        {
-                            ActivityID = wMeterReading.Rows[0]["ActivityId"].ToString();
-                            meterUnits = int.Parse(wMeterReading.Rows[0]["GuCode"].ToString());
-                            sewage = int.Parse(wMeterReading.Rows[0]["Sewage"].ToString());
-                        }
-                        else
-                        {
-                            var mtrDetails = GetMeterDetails(MeterID);
-                            if (mtrDetails != null && mtrDetails.Rows.Count > 0)
-                            {
-                                ActivityID = mtrDetails.Rows[0]["ActivityId"].ToString();
-                                meterUnits = int.Parse(mtrDetails.Rows[0]["GuCode"].ToString());
-                                sewage = int.Parse(mtrDetails.Rows[0]["PhaseNo"].ToString());
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    // Log data after
-                    richTextBox7.AppendText("Failed MeterID:" + MeterID + System.Environment.NewLine);
-                }
-
-                // Log data after
-                richTextBox7.AppendText("End recalculate   ID:" + MonthReadingID +
-                                        "- MeterID:" + MeterID +
-                                        "- ActivityID:" + ActivityID +
-                                        "- Year:" + Year +
-                                        "- Month:" + Month +
-                                        "- PhaseNo:" + sewage +
-                                        "- GuCode:" + meterUnits + System.Environment.NewLine);
-
-                // Update month reading
-                UpdateDbMonthReadingDetails(MonthReadingID, sewage, meterUnits, ActivityID);
+                //// Log data after
+                //SetReviewCardResultTxt("End recalculate   ID:" + CardReadingID + "- Result:" + result + System.Environment.NewLine, true);
+                //SetReviewCardResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
 
                 return true;
             }
@@ -1070,41 +1165,1155 @@ namespace MonthReadingRecalculation
         }
 
         /// <summary>
-        /// Update month readings details
+        /// Update mass card readings details
         /// </summary>
-        /// <param name="ID">Identifier</param>
-        /// <param name="PhaseNo">PhaseNo</param>
-        /// <param name="GuCode">GuCode</param> 
-        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="ID">Mass reading identifier</param>
         /// <returns>Bool indicator saved or not</returns>
-        public bool UpdateDbMonthReadingDetails(int ID, int PhaseNo, int GuCode, string ActivityID)
+        public bool UpdateReviewCardDetails(int ID)
         {
             try
             {
                 dboperation db = new dboperation(connectionString);
                 db.objcmd.Parameters.Clear();
                 db.objcmd.CommandType = CommandType.StoredProcedure;
-                db.objcmd.CommandText = "UpdateMonthReadingsDetails";
-                db.objcmd.Parameters.AddWithValue("@ID", ID);
-                db.objcmd.Parameters.AddWithValue("@PhaseNo", PhaseNo);
-                db.objcmd.Parameters.AddWithValue("@GuCode", GuCode);
-                db.objcmd.Parameters.AddWithValue("@ActivityID", ActivityID);
-                SqlParameter sqlResult = new SqlParameter("@sqlResult", SqlDbType.Int, 1);
+                db.objcmd.CommandText = "UpdateMassReadingData";
+                db.objcmd.Parameters.AddWithValue("@MassCardReadingId", ID);
+                SqlParameter sqlResult = new SqlParameter("@ReturnVal", SqlDbType.Bit, 1);
                 sqlResult.Direction = ParameterDirection.Output;
                 db.objcmd.Parameters.Add(sqlResult);
                 db.ExecuteNonQuery("");
 
-                if (sqlResult.Value != null && (int)sqlResult.Value == 2) // Add month reading
+                if (sqlResult.Value != null && (bool)sqlResult.Value == true) // Add mass card reading
                 {
                     return true;
                 }
 
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
+        }
+
+        #endregion
+
+        #region Update tarriff difference
+
+        private void SetTarrifDifferenceResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.TarrifDifferenceResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetTarrifDifferenceResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.TarrifDifferenceResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.TarrifDifferenceResultTxt.Text = text;
+                }
+            }
+        }
+
+        private void TarrifDifferenceBtn_Click(object sender, EventArgs e)
+        {
+            TarrifDifferenceProgressBar.Value = 0;
+            TarrifDifferenceProgressBar.Step = 1;
+            TarrifDifferenceProgressBar.Maximum = 0;
+            TarrifDifferenceResultTxt.Text = "";
+            TarrifDifferenceProgressLbl.Text = "";
+
+            ConnectDB();
+            UpdateandRecalcTarrifDifference(TarrifDifferenceQueryTxt.Text);
+        }
+
+        /// <summary>
+        /// Update mass card readings based on table query
+        /// </summary>
+        /// <param name="MonthReadingQuery">Mass card reading query</param>
+        public void UpdateandRecalcTarrifDifference(string TarrifDiffQuery)
+        {
+            DataTable monthReadingsList = ExecuteSelectQuery(TarrifDiffQuery);
+
+            if (monthReadingsList != null && monthReadingsList.Rows.Count > 0)
+            {
+                TarrifDifferenceProgressLbl.Text = monthReadingsList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                TarrifDifferenceProgressBar.Value = 0;
+                TarrifDifferenceProgressBar.Step = 1;
+                TarrifDifferenceProgressBar.Maximum = monthReadingsList.Rows.Count;
+                TarrifDifferenceProgressLbl.Text = string.Format("{0} records Completed from {1}", TarrifDifferenceProgressBar.Value, TarrifDifferenceProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < monthReadingsList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            if (i < monthReadingsList.Rows.Count)
+                            {
+                                try
+                                {
+                                    CalculateTariffDifference(int.Parse(monthReadingsList.Rows[i]["ID"].ToString()),
+                                                              monthReadingsList.Rows[i]["ActivityID"].ToString(),
+                                                              monthReadingsList.Rows[i]["SerialNu"].ToString(),
+                                                              monthReadingsList.Rows[i]["MeterId"].ToString(),
+                                                              int.Parse(monthReadingsList.Rows[i]["month"].ToString()),
+                                                              int.Parse(monthReadingsList.Rows[i]["year"].ToString()),
+                                                              int.Parse(monthReadingsList.Rows[i]["GuCode"].ToString() == "" ? "1" : monthReadingsList.Rows[i]["GuCode"].ToString()),
+                                                              int.Parse(monthReadingsList.Rows[i]["PhaseNo"].ToString() == "" ? "1" : monthReadingsList.Rows[i]["PhaseNo"].ToString()),
+                                                              Convert.ToDecimal(monthReadingsList.Rows[i]["TotalConsumption"].ToString()),
+                                                              Convert.ToDecimal(monthReadingsList.Rows[i]["ConsumptionMoney"].ToString()),
+                                                              double.Parse(monthReadingsList.Rows[i]["CBMPrice"].ToString()),
+                                                              double.Parse(monthReadingsList.Rows[i]["Healthy"].ToString()),
+                                                              double.Parse(monthReadingsList.Rows[i]["ServiceBox"].ToString()),
+                                                              System.DateTime.Parse(monthReadingsList.Rows[i]["TariffStartDate"].ToString()));
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    TarrifDifferenceProgressBar.PerformStep();
+                    TarrifDifferenceProgressLbl.Text = string.Format("{0} records Completed from {1}", TarrifDifferenceProgressBar.Value, TarrifDifferenceProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                TarrifDifferenceProgressBar.Value = 0;
+                TarrifDifferenceProgressBar.Step = 1;
+                TarrifDifferenceProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update mass card readings
+        /// </summary>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="Year">Reading year</param>
+        /// <param name="Month">Reading month from meter</param>
+        /// <param name="TotalReading">Total consumption Reading from meter</param>
+        /// <param name="UsedMonthly">Used Consuption Money Monthly</param>
+        /// <param name="FixFee">Fixed Fee from meter</param>
+        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="sewage">sewage</param> 
+        /// <param name="meterUnits">meterUnits</param> 
+        /// <param name="MeterVersionType">MeterVersionType</param> 
+        /// <returns>Add result</returns>
+        public bool CalculateTariffDifference(int MonthReadingID, string activityId, string serialNu, string meterId, int month, int year, int unitsNo, int sewage, decimal totalConsumption, decimal oldConsumptionMoney, double oldCBMPrice, double oldHealthy, double oldServiceBox, DateTime oldActiveDate)
+        {
+            SqlTransaction transaction = null;
+            dboperation db = new dboperation(connectionString);
+
+            try
+            {
+                // Get adjustment Type
+                var adjustmentType = int.Parse(db.ReturnStr("select id from AdjustmentTypes where Code = '6'"));
+                var setingDT = db.SelectData("select top 1 MaxInstalmentsAmount,DefaultInstalmentsNumber from settings");
+                var MaxInstalmentsAmount = Convert.ToDecimal(string.IsNullOrEmpty(setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString()) ? "0" : setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString());
+                var DefaultInstalmentsNumber = int.Parse(string.IsNullOrEmpty(setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString()) ? "1" : setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString());
+                var newActiveDate = new System.DateTime(2022, 3, 1);
+
+                // Get new water price
+                var newTariff = GetTariff(activityId, newActiveDate);
+                var newConsumptionModel = GetSpecificDateConsumption(newActiveDate, activityId, unitsNo, sewage, totalConsumption, meterId, newTariff);
+                newActiveDate = newConsumptionModel.tarrifStartDate;
+                var newTotalPrice = newConsumptionModel.TotalPrice + newConsumptionModel.Fixfee;
+                var consumptionPriceDifference = newTotalPrice - oldConsumptionMoney;
+
+                // Start transaction
+                if (db.objcmd.Connection.State != ConnectionState.Open)
+                {
+                    db.objcmd.Connection.Open();
+                }
+
+                transaction = db.objcmd.Connection.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
+                db.objcmd.Transaction = transaction;
+
+                // Save Water Tariff Price Differences
+                string query = " insert into TariffPriceDifferences ( MeterId , ActivityId,OldTariffDate,NewTariffDate,MonthReadingsId, Year, Month ,ChargeSerialNu,MeterTotalConsumption, MeterConsumptionPrice , OldWaterPrice , OldHealthyPrice,OldServiceBoxPrice ,"
+                             + " NewWaterPrice , NewHealthyPrice,NewServiceBoxPrice,NewConsumptionPrice,ConsumptionPriceDifference,isAdjustmentAdded,CreatedDate,CreatedBy )"
+                             + " values('" + meterId + "','" + activityId + "','" + oldActiveDate.ToString("yyyy-MM-dd") + "','" + newActiveDate.ToString("yyyy-MM-dd") + "'," + MonthReadingID + "," + year + "," + month + ",'" + serialNu + "',"
+                             + totalConsumption + "," + oldConsumptionMoney + "," + oldCBMPrice + "," + oldHealthy + "," + oldServiceBox + "," + newConsumptionModel.WaterPrice + "," + newConsumptionModel.SewagePrice + "," + newConsumptionModel.ServiceBoxWithTax + ","
+                             + newTotalPrice + "," + consumptionPriceDifference + ",0,getDate(),(select top 1 userid from users))";
+                db.objcmd.CommandText = query;
+                var ret = db.objcmd.ExecuteNonQuery();
+
+                if (ret > 0)
+                {
+                    // update month reading
+                    string updateMonthReadingQuery = "update MonthReadings set CBMPrice = " + newConsumptionModel.WaterPrice + " , Healthy = " + newConsumptionModel.SewagePrice + " ,"
+                                                            + " ServiceBox = " + newConsumptionModel.ServiceBoxWithTax + " ,"
+                                                            + " FixFee = " + newConsumptionModel.Fixfee + " ,"
+                                                            + " ConsumptionMoney = " + newTotalPrice + " ,"
+                                                            + " tarriffAdjustment = " + consumptionPriceDifference + ","
+                                                            + " TariffStartDate = '" + newActiveDate.ToString("yyyy-MM-dd") + "'"
+                                                            + " where id = " + MonthReadingID;
+
+                    db.objcmd.CommandText = updateMonthReadingQuery;
+                    var res = db.objcmd.ExecuteNonQuery();
+
+                    if (res > 0)
+                    {
+                        // Add Water Tariff Price Differences as adjustment if positive value 
+                        query = " insert into Adjustments (Code,MeterID,Type,Reason,CurrentDate,TotalValue,MonthsCount,MonthlyRate,Remminder,PaidMonths,PercentValue,IsDeleted,ActiveAd,description ,UserID ,AccountNo,inputdate , DueDate) "
+                            + " select (IDENT_CURRENT('Adjustments') + ROW_NUMBER() OVER (ORDER BY MeterId)) ,MeterId, " + adjustmentType + " , (select top 1 id from AdjustmentReasons),getDate(),sum(ConsumptionPriceDifference),CASE WHEN "
+                            + " sum(ConsumptionPriceDifference) > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN " + DefaultInstalmentsNumber + " ELSE 1 END,"
+                            + " CASE WHEN sum(ConsumptionPriceDifference) > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN (sum(ConsumptionPriceDifference) / " + DefaultInstalmentsNumber + " )   ELSE sum(ConsumptionPriceDifference) "
+                            + " END,sum(ConsumptionPriceDifference),0,100,0,1,(select concat(sum(ConsumptionPriceDifference) , '')) + (select '  فرق التعريفة اثر رجعي ') ,"
+                            + " (select top 1 userid from users),(SELECT top 1 AccountNo FROM METERS where meterid = TariffPriceDifferences.MeterId),getDate(),getDate() "
+                            + " from TariffPriceDifferences "
+                            + " where isAdjustmentAdded = 0 and ConsumptionPriceDifference > 0.1 "
+                            + " group by MeterId ";
+
+                        db.objcmd.CommandText = query;
+                        db.objcmd.ExecuteNonQuery();
+
+                        query = "update TariffPriceDifferences set isAdjustmentAdded = 1 where isAdjustmentAdded = 0";
+                        db.objcmd.CommandText = query;
+                        db.objcmd.ExecuteNonQuery();
+
+                        //// insert Reading Stairs
+                        //query = "delete from ReadingStairs where ReadingID = " + MonthReadingID;
+                        //db.objcmd.CommandText = query;
+                        //db.objcmd.ExecuteNonQuery();
+
+                        //query = " Insert into ReadingStairs(ReadingID, Price1, Price2, Price3, Price4, Price5, Price6, "
+                        //      + " WaterPrice1, WaterPrice2, WaterPrice3, WaterPrice4, WaterPrice5, WaterPrice6, QuantityStair1, QuantityStair2, "
+                        //      + " QuantityStair3, QuantityStair4, QuantityStair5, QuantityStair6, Heleathy1, Heleathy2, Heleathy3, Heleathy4, Heleathy5, Heleathy6, WService)"
+                        //      + " Values ( " + MonthReadingID + "," + newConsumptionModel.Stairs.Rows[0]["Price1"] + "," + newConsumptionModel.Stairs.Rows[0]["Price2"] + "," + newConsumptionModel.Stairs.Rows[0]["Price3"] + "," + newConsumptionModel.Stairs.Rows[0]["Price4"] + "," + newConsumptionModel.Stairs.Rows[0]["Price5"] + "," + newConsumptionModel.Stairs.Rows[0]["Price6"] + ","
+                        //      + newConsumptionModel.Stairs.Rows[0]["WaterPrice1"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice2"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice3"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice4"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice5"] + "," + newConsumptionModel.Stairs.Rows[0]["WaterPrice6"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair1"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair2"] + ", "
+                        //      + newConsumptionModel.Stairs.Rows[0]["QuantityStair3"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair4"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair5"] + "," + newConsumptionModel.Stairs.Rows[0]["QuantityStair6"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy1"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy2"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy3"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy4"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy5"] + "," + newConsumptionModel.Stairs.Rows[0]["Heleathy6"] + "," + newConsumptionModel.Stairs.Rows[0]["WService"] + ")";
+                        //db.objcmd.CommandText = query;
+                        //db.objcmd.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
+
+        #endregion
+
+        #region Fix sewage for tarrif difference
+
+        private void SetFixSewageResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.FixSewageResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetFixSewageResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.FixSewageResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.FixSewageResultTxt.Text = text;
+                }
+            }
+        }
+
+        private void FixSewageBtn_Click(object sender, EventArgs e)
+        {
+            FixSewageProgressBar.Value = 0;
+            FixSewageProgressBar.Step = 1;
+            FixSewageProgressBar.Maximum = 0;
+            FixSewageResultTxt.Text = "";
+            FixSewageProgressLbl.Text = "";
+
+            ConnectDB();
+            UpdateAndFixSewage(FixSewageQueryTxt.Text);
+        }
+
+        /// <summary>
+        /// Update mass card readings based on table query
+        /// </summary>
+        /// <param name="MonthReadingQuery">Mass card reading query</param>
+        public void UpdateAndFixSewage(string fixSewageQuery)
+        {
+            DataTable monthReadingsList = ExecuteSelectQuery(fixSewageQuery);
+
+            if (monthReadingsList != null && monthReadingsList.Rows.Count > 0)
+            {
+                FixSewageProgressLbl.Text = monthReadingsList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                FixSewageProgressBar.Value = 0;
+                FixSewageProgressBar.Step = 1;
+                FixSewageProgressBar.Maximum = monthReadingsList.Rows.Count;
+                FixSewageProgressLbl.Text = string.Format("{0} records Completed from {1}", FixSewageProgressBar.Value, FixSewageProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < monthReadingsList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            if (i < monthReadingsList.Rows.Count)
+                            {
+                                try
+                                {
+                                    RecalcSewageforTariffDifference(int.Parse(monthReadingsList.Rows[i]["ID"].ToString()),
+                                                                    monthReadingsList.Rows[i]["ActivityID"].ToString(),
+                                                                    monthReadingsList.Rows[i]["MeterId"].ToString(),
+                                                                    int.Parse(monthReadingsList.Rows[i]["GuCode"].ToString() == "" ? "1" : monthReadingsList.Rows[i]["GuCode"].ToString()),
+                                                                    int.Parse(monthReadingsList.Rows[i]["PhaseNo"].ToString() == "" ? "1" : monthReadingsList.Rows[i]["PhaseNo"].ToString()),
+                                                                    Convert.ToDecimal(monthReadingsList.Rows[i]["TotalConsumption"].ToString()),
+                                                                    Convert.ToDecimal(monthReadingsList.Rows[i]["OldConsumption"].ToString()),
+                                                                    Convert.ToDecimal(monthReadingsList.Rows[i]["tarriffAdjustment"].ToString()),
+                                                                    double.Parse(monthReadingsList.Rows[i]["Healthy"].ToString()));
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    FixSewageProgressBar.PerformStep();
+                    FixSewageProgressLbl.Text = string.Format("{0} records Completed from {1}", FixSewageProgressBar.Value, FixSewageProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                FixSewageProgressBar.Value = 0;
+                FixSewageProgressBar.Step = 1;
+                FixSewageProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update and fix wrong sewage
+        /// </summary>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="Year">Reading year</param>
+        /// <param name="Month">Reading month from meter</param>
+        /// <param name="TotalReading">Total consumption Reading from meter</param>
+        /// <param name="UsedMonthly">Used Consuption Money Monthly</param>
+        /// <param name="FixFee">Fixed Fee from meter</param>
+        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="sewage">sewage</param> 
+        /// <param name="meterUnits">meterUnits</param> 
+        /// <param name="MeterVersionType">MeterVersionType</param> 
+        /// <returns>Add result</returns>
+        public bool RecalcSewageforTariffDifference(int MonthReadingID, string activityId, string meterId, int unitsNo, int sewage, decimal Reading, decimal OldConsumption, decimal oldTarrifAdjustment, double oldHealthy)
+        {
+            SqlTransaction transaction = null;
+            dboperation db = new dboperation(connectionString);
+            int adjustmentID = 0;
+            decimal adjustmentValue = 0;
+            int adjustmentPaid = 0;
+
+            try
+            {
+                // Get adjustment Type
+                var freeAdjustment = int.Parse(db.ReturnStr("select id from AdjustmentTypes where Code = '12'"));
+                var adjustmentType = int.Parse(db.ReturnStr("select id from AdjustmentTypes where Code = '6'"));
+                var setingDT = db.SelectData("select top 1 MaxInstalmentsAmount,DefaultInstalmentsNumber from settings");
+                var MaxInstalmentsAmount = Convert.ToDecimal(string.IsNullOrEmpty(setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString()) ? "0" : setingDT.Rows[0]["MaxInstalmentsAmount"]?.ToString());
+                var DefaultInstalmentsNumber = int.Parse(string.IsNullOrEmpty(setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString()) ? "1" : setingDT.Rows[0]["DefaultInstalmentsNumber"]?.ToString());
+                var newActiveDate = new System.DateTime(2022, 3, 1);
+
+                // Get new water price
+                var newTariff = GetTariff(activityId, newActiveDate);
+                var newConsumptionModel = GetSpecificDateConsumption(newActiveDate, activityId, unitsNo, sewage, Reading, meterId, newTariff);
+
+                var newTotalPrice = newConsumptionModel.TotalPrice + newConsumptionModel.Fixfee;
+                var consumptionPriceDifference = newTotalPrice - OldConsumption;
+
+                if (oldTarrifAdjustment > 0)
+                {
+                    var adjustment = db.SelectData("select top 1 ID,PaidMonths,TotalValue from Adjustments where type = " + adjustmentType + " and meterid = '" + meterId + "'");
+                    adjustmentID = int.Parse(adjustment.Rows[0]["ID"].ToString());
+                    adjustmentPaid = int.Parse(adjustment.Rows[0]["PaidMonths"].ToString());
+                    adjustmentValue = Convert.ToDecimal(adjustment.Rows[0]["TotalValue"].ToString());
+                }
+
+                // Start transaction
+                if (db.objcmd.Connection.State != ConnectionState.Open)
+                {
+                    db.objcmd.Connection.Open();
+                }
+
+                transaction = db.objcmd.Connection.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
+                db.objcmd.Transaction = transaction;
+
+                // update month reading
+                string query = "update MonthReadings set Healthy = " + newConsumptionModel.SewagePrice + " ,"
+                                                        + " ConsumptionMoney = " + newTotalPrice + " ,"
+                                                        + " tarriffAdjustment = " + consumptionPriceDifference
+                                                        + " where id = " + MonthReadingID;
+
+                db.objcmd.CommandText = query;
+                var res = db.objcmd.ExecuteNonQuery();
+
+                // update tarrif difference
+                query = "update TariffPriceDifferences set NewHealthyPrice = " + newConsumptionModel.SewagePrice + " ,"
+                                                        + " NewConsumptionPrice = " + newTotalPrice + " ,"
+                                                        + " ConsumptionPriceDifference = " + consumptionPriceDifference
+                                                        + " where MonthReadingsId = " + MonthReadingID;
+
+                db.objcmd.CommandText = query;
+                res = db.objcmd.ExecuteNonQuery();
+
+                // Update adjustments
+                if (oldTarrifAdjustment > 0)
+                {
+                    decimal AdjustmentDiff = oldTarrifAdjustment - consumptionPriceDifference;
+
+                    if (adjustmentPaid > 0)
+                    {
+                        // Insert new one with diff
+                        if (AdjustmentDiff < 0)
+                        {
+                            AdjustmentDiff = AdjustmentDiff * -1;
+
+                            // for HCWW
+                            if (AdjustmentDiff > (decimal)0.1)
+                            {
+                                query = " insert into Adjustments (Code,MeterID,Type,Reason,CurrentDate,TotalValue,MonthsCount,MonthlyRate,Remminder,PaidMonths,PercentValue,IsDeleted,ActiveAd,description ,UserID ,AccountNo,inputdate , DueDate) "
+                                    + " values( (IDENT_CURRENT('Adjustments') + 1 ) ,'"+meterId+"', " + adjustmentType + " , (select top 1 id from AdjustmentReasons),getDate(),"+AdjustmentDiff+" ,CASE WHEN "
+                                    + AdjustmentDiff+ " > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN " + DefaultInstalmentsNumber + " ELSE 1 END,"
+                                    + " CASE WHEN "+AdjustmentDiff+" > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN ("+AdjustmentDiff+" / " + DefaultInstalmentsNumber + " )   ELSE  " + AdjustmentDiff
+                                    + " END,"+AdjustmentDiff+",0,100,0,1,(select concat("+AdjustmentDiff+" , '')) + (select '  فرق التعريفة اثر رجعي ') ,"
+                                    + " (select top 1 userid from users),(SELECT top 1 AccountNo FROM METERS where meterid = '"+meterId+"'),getDate(),getDate())";
+                            }
+                        }
+                        else if (AdjustmentDiff > (decimal)0.1)
+                        {
+                            // for customer
+                            query = " insert into Adjustments (Code,MeterID,Type,Reason,CurrentDate,TotalValue,MonthsCount,MonthlyRate,Remminder,PaidMonths,PercentValue,IsDeleted,ActiveAd,description ,UserID ,AccountNo,inputdate , DueDate) "
+                                   + " values( (IDENT_CURRENT('Adjustments') + 1) ,'"+meterId+"', " + freeAdjustment + " , (select top 1 id from AdjustmentReasons),getDate(),"+AdjustmentDiff+" ,CASE WHEN "
+                                   + AdjustmentDiff+ " > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN " + DefaultInstalmentsNumber + " ELSE 1 END,"
+                                   + " CASE WHEN "+AdjustmentDiff+" > " + MaxInstalmentsAmount + " and " + MaxInstalmentsAmount + " != 0  THEN ("+AdjustmentDiff+" / " + DefaultInstalmentsNumber + " )   ELSE  " + AdjustmentDiff
+                                   + " END,"+AdjustmentDiff+",0,100,0,1,(select concat("+AdjustmentDiff+" , '')) + (select '  فرق التعريفة اثر رجعي ') ,"
+                                   + " (select top 1 userid from users),(SELECT top 1 AccountNo FROM METERS where meterid = '"+meterId+"'),getDate(),getDate())";
+                        }
+                    }
+                    else
+                    {
+                        // Update old one
+                        query = " update Adjustments set TotalValue = " + consumptionPriceDifference + ", Remminder="+ consumptionPriceDifference +" , MonthlyRate=" +consumptionPriceDifference +" where id = " + adjustmentID;
+                    }
+
+                    db.objcmd.CommandText = query;
+                    db.objcmd.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
+
+        #endregion
+
+        #region Recalc month reading with new quantity
+
+        private void SetRecalcQuantityResultTxt(string text, bool append = false)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.RecalcQuantityResultTxt.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetRecalcQuantityResultTxt);
+                this.Invoke(d, new object[] { text, append });
+            }
+            else
+            {
+                if (append)
+                {
+                    this.RecalcQuantityResultTxt.AppendText(text);
+                }
+                else
+                {
+                    this.RecalcQuantityResultTxt.Text = text;
+                }
+            }
+        }
+
+        private void RecalcQuantityBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                RecalcQuantityProgressBar.Value = 0;
+                RecalcQuantityProgressBar.Step = 1;
+                RecalcQuantityProgressBar.Maximum = 0;
+                RecalcQuantityResultTxt.Text = "";
+                RecalcQuantityProgressLbl.Text = "";
+
+                ConnectDB();
+                RecalcMonthReadingQuantity(RecalcQuantityQueryTxt.Text);
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
+        /// Recalc water meter month readings based on new quantity
+        /// </summary>
+        /// <param name="MonthReadingQuery">Month reading query</param>
+        public void RecalcMonthReadingQuantity(string MonthReadingQuery)
+        {
+            DataTable monthReadingList = ExecuteSelectQuery(MonthReadingQuery);
+
+            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
+            {
+                RecalcQuantityProgressLbl.Text = monthReadingList.Rows.Count.ToString();
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                RecalcQuantityProgressBar.Value = 0;
+                RecalcQuantityProgressBar.Step = 1;
+                RecalcQuantityProgressBar.Maximum = monthReadingList.Rows.Count;
+                RecalcQuantityProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcQuantityProgressBar.Value, RecalcQuantityProgressBar.Maximum);
+
+                worker.DoWork += new DoWorkEventHandler(delegate (object o, DoWorkEventArgs args)
+                {
+                    for (int t = 0; t < monthReadingList.Rows.Count; t++)
+                    {
+                        var i = t;
+
+                        try
+                        {
+                            worker.ReportProgress(t);
+
+                            if (i < monthReadingList.Rows.Count)
+                            {
+                                try
+                                {
+                                    RecalcWaterMonthReadingsWithNewQuantity(
+                                          int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                          monthReadingList.Rows[i]["MeterID"].ToString(),
+                                          monthReadingList.Rows[i]["ActivityID"].ToString(),
+                                          int.Parse(monthReadingList.Rows[i]["PhaseNo"].ToString()),
+                                          int.Parse(monthReadingList.Rows[i]["GuCode"].ToString()),
+                                          decimal.Parse(monthReadingList.Rows[i]["Read"].ToString()),
+                                          decimal.Parse(monthReadingList.Rows[i]["OldConsumption"].ToString()),
+                                          decimal.Parse(monthReadingList.Rows[i]["ConsumptionMoney"].ToString()),
+                                          int.Parse(monthReadingList.Rows[i]["Year"].ToString()),
+                                          int.Parse(monthReadingList.Rows[i]["Month"].ToString()),
+                                          Convert.ToDecimal(monthReadingList.Rows[i]["consumptionAdjustment"]),
+                                          Convert.ToDecimal(monthReadingList.Rows[i]["tarriffAdjustment"]),
+                                          Convert.ToDecimal(monthReadingList.Rows[i]["meterInstallment"])
+                                          );
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                });
+
+                // Handle progress change
+                worker.ProgressChanged += new ProgressChangedEventHandler(
+                delegate (object o, ProgressChangedEventArgs args)
+                {
+                    RecalcQuantityProgressBar.PerformStep();
+                    RecalcQuantityProgressLbl.Text = string.Format("{0} records Completed from {1}", RecalcQuantityProgressBar.Value, RecalcQuantityProgressBar.Maximum);
+                });
+
+                // Handle complete
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                RecalcQuantityProgressBar.Value = 0;
+                RecalcQuantityProgressBar.Step = 1;
+                RecalcQuantityProgressBar.Maximum = 0;
+            }
+        }
+
+        /// <summary>
+        /// Recalculate water meter month readings
+        /// </summary>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="Year">Reading year</param>
+        /// <param name="Month">Reading month from meter</param>
+        /// <param name="TotalReading">Total consumption Reading from meter</param>
+        /// <param name="UsedMonthly">Used Consuption Money Monthly</param>
+        /// <param name="FixFee">Fixed Fee from meter</param>
+        /// <param name="ActivityID">ActivityID</param>
+        /// <param name="sewage">sewage</param> 
+        /// <param name="meterUnits">meterUnits</param> 
+        /// <param name="MeterVersionType">MeterVersionType</param> 
+        /// <returns>Add result</returns>
+        public bool RecalcWaterMonthReadingsWithNewQuantity(int MonthReadingId, string MeterID, string ActivityID, int sewage, int meterUnits, decimal OldConsumption, decimal NewConsumption, decimal UsedMonthly, int Year, int Month, decimal oldConsumptionAdjustment, decimal oldTarriffAdjustment, decimal meterInstallment)
+        {
+            try
+            {
+                decimal LastCBM = 0;
+                decimal LastHealth = 0;
+                decimal LastServiceBox = 0;
+                decimal LastFixFee = 0;
+                decimal consumptionAdjustment = 0;
+                decimal tarriffAdjustment = 0;
+                var monthDate = new System.DateTime(Year, Month, 1);
+                ConsumptionModel lastChargeConsumptionModel = null;
+
+                // Get meter model type
+                int meterType = GetMeterTypeByMeterId(MeterID);
+
+                // Get expected tarrif calculation object
+                var expectedConsumptionModel = GetSpecificDateConsumption(monthDate.AddMonths(1).AddDays(-1), ActivityID, meterUnits, sewage, NewConsumption, MeterID);
+
+                // Set new consumption money
+                //if (meterType == 10 || meterType == 11)
+                //{
+                UsedMonthly = expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee;
+                LastCBM = expectedConsumptionModel.WaterPrice;
+                LastHealth = expectedConsumptionModel.SewagePrice;
+                LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
+                LastFixFee = expectedConsumptionModel.Fixfee;
+                //}
+
+                // Get last success charge details
+                DataTable lastChargeDT = GetMeterLastSuccessCharge(MeterID, monthDate.AddMonths(1));
+
+                // Check tarrif changes
+                if (lastChargeDT.Rows.Count > 0 && Convert.ToDateTime(lastChargeDT.Rows[0]["TariffStartDate"].ToString()) != expectedConsumptionModel.tarrifStartDate
+                    && System.DateTime.Parse(lastChargeDT.Rows[0]["serverDate"].ToString()) <= monthDate.AddMonths(1))
+                {
+                    // Get last charge tarrif calculation object
+                    lastChargeConsumptionModel = GetSpecificDateConsumption(System.DateTime.Parse(lastChargeDT.Rows[0]["TariffStartDate"].ToString()), ActivityID, meterUnits, sewage, NewConsumption, MeterID);
+
+                    // Get different tarrif recalc adjustment
+                    if (lastChargeConsumptionModel != null)
+                    {
+                        tarriffAdjustment = (expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee + meterInstallment) - (lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee);
+
+                        // Set new consumption money
+                        //if (meterType == 10 || meterType == 11)
+                        //{
+                        UsedMonthly = lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee;
+                        LastCBM = expectedConsumptionModel.WaterPrice;
+                        LastHealth = expectedConsumptionModel.SewagePrice;
+                        LastServiceBox = expectedConsumptionModel.ServiceBoxWithTax;
+                        LastFixFee = expectedConsumptionModel.Fixfee;
+                        //}
+                    }
+                }
+
+                // Get different money consumption adjustment (New meters only)
+                if (meterType != 10 && meterType != 11)
+                {
+                    if (lastChargeConsumptionModel != null)
+                    {
+                        consumptionAdjustment = (lastChargeConsumptionModel.TotalPrice + lastChargeConsumptionModel.Fixfee + meterInstallment) - UsedMonthly;
+                    }
+                    else
+                    {
+                        consumptionAdjustment = (expectedConsumptionModel.TotalPrice + expectedConsumptionModel.Fixfee + meterInstallment) - UsedMonthly;
+                    }
+                }
+
+                // Prepare new adjustments difference
+                var consumptionAdjustmentDiff = consumptionAdjustment - oldConsumptionAdjustment;
+                var tarriffAdjustmentDiff = tarriffAdjustment - oldTarriffAdjustment;
+
+                // Update MonthReadings record
+                var updateMonthReadingsResult = UpdateMonthReadingData(MonthReadingId, UsedMonthly, consumptionAdjustment, tarriffAdjustment, LastCBM, LastHealth, LastServiceBox, LastFixFee);
+
+                if (updateMonthReadingsResult > 0)
+                {
+                    // Add MonthReadingConsumptionDiffs record
+                    var addMonthReadingConsumptionDiffsResult = UpdateMonthReadingConsumptionDiff(MonthReadingId, MeterID, Year, Month, OldConsumption, NewConsumption, oldTarriffAdjustment, tarriffAdjustment, oldConsumptionAdjustment, consumptionAdjustment, consumptionAdjustmentDiff, tarriffAdjustmentDiff);
+
+                    if (addMonthReadingConsumptionDiffsResult > 0)
+                    {
+                        // Add adjustment difference
+                        if (tarriffAdjustmentDiff > (decimal)0.1)
+                        {
+                            var AddAdjustmentdt = PrepareAddAdjustment(14);
+                            decimal MaxInstalmentsAmount = decimal.Parse(AddAdjustmentdt.Rows[0]["MaxInstalmentsAmount"].ToString());
+                            int DefaultInstalmentsNumber = int.Parse(AddAdjustmentdt.Rows[0]["DefaultInstalmentsNumber"].ToString());
+
+                            if (AddAdjustmentdt.Rows.Count > 0)
+                            {
+                                var monthCount = 1;
+                                var monthrate = tarriffAdjustmentDiff;
+
+                                if (tarriffAdjustmentDiff > MaxInstalmentsAmount && MaxInstalmentsAmount != 0)
+                                {
+                                    monthCount = DefaultInstalmentsNumber;
+                                    monthrate = tarriffAdjustmentDiff / DefaultInstalmentsNumber;
+                                }
+
+                                AddAdjustment(MeterID, tarriffAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                            }
+                        }
+                        else if (tarriffAdjustmentDiff < -(decimal)0.1)
+                        {
+                            var AddAdjustmentdt = PrepareAddAdjustment(17);
+
+                            if (AddAdjustmentdt.Rows.Count > 0)
+                            {
+                                var monthCount = 1;
+                                var monthrate = -tarriffAdjustmentDiff;
+
+                                AddAdjustment(MeterID, (-tarriffAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                            }
+                        }
+
+                        // Add adjustment: on difference used money (New meters only)
+                        if (consumptionAdjustmentDiff > (decimal)0.1)
+                        {
+                            var AddAdjustmentdt = PrepareAddAdjustment(10);
+                            decimal MaxInstalmentsAmount = decimal.Parse(AddAdjustmentdt.Rows[0]["MaxInstalmentsAmount"].ToString());
+                            int DefaultInstalmentsNumber = int.Parse(AddAdjustmentdt.Rows[0]["DefaultInstalmentsNumber"].ToString());
+
+                            if (AddAdjustmentdt.Rows.Count > 0)
+                            {
+                                var monthCount = 1;
+                                var monthrate = consumptionAdjustmentDiff;
+
+                                if (consumptionAdjustmentDiff > MaxInstalmentsAmount && MaxInstalmentsAmount != 0)
+                                {
+                                    monthCount = DefaultInstalmentsNumber;
+                                    monthrate = consumptionAdjustmentDiff / DefaultInstalmentsNumber;
+                                }
+
+                                AddAdjustment(MeterID, consumptionAdjustmentDiff.ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                            }
+                        }
+                        else if (consumptionAdjustmentDiff < -(decimal)0.1)
+                        {
+
+                            var AddAdjustmentdt = PrepareAddAdjustment(16);
+
+                            if (AddAdjustmentdt.Rows.Count > 0)
+                            {
+                                var monthCount = 1;
+                                var monthrate = -consumptionAdjustmentDiff;
+
+                                AddAdjustment(MeterID, (-consumptionAdjustmentDiff).ToString(), monthCount.ToString(), monthrate.ToString(), AddAdjustmentdt.Rows[0]["AdjustmentType"].ToString(), getDateTime(), AddAdjustmentdt.Rows[0]["adjustmentCode"].ToString(), "100", AddAdjustmentdt.Rows[0]["DefaultAdjustmentReason"].ToString(), 1, MonthReadingId, " عن شهر " + monthDate.ToString("MM-yyyy"));
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                SetRecalculateResultTxt("fail to update ID:" + MonthReadingId + System.Environment.NewLine, true);
+                SetRecalculateResultTxt("--------------------------------------------" + System.Environment.NewLine, true);
+            }
+
+            return true;
+        }
+
+        public DataTable GetMeterLastSuccessCharge(string meterId, DateTime specificDate)
+        {
+            return new dboperation(connectionString).SelectData("select top 1 id ,SerialNo, TotalValue , ChargeValue , ChargeNo,Type,ActivityID,Curdate , PaymentType,serverDate ,TariffStartDate,UnitNo,PhaseNo " +
+                                " from charges where meterid = '" + meterId + "' and (makecard = 1 or MakeCard IS NULL) " +
+                                 " and  convert(datetime , serverDate, 103 ) < convert(datetime , '" + specificDate.ToString("dd/MM/yyyy") + "' , 103 ) order by Curdate desc ");
+        }
+
+        /// <summary>
+        /// Get meter last success charge software version
+        /// </summary>
+        /// <param name="meterId"></param>
+        /// <returns>meter last success charge software version</returns>
+        public DataTable GetMeterLastSuccessChargeVersion(string meterId)
+        {
+            return new dboperation(connectionString).SelectData(" select top 1 id ,Softwareversion from charges "+
+                                   " where meterid = '" + meterId + "' and (makecard = 1 or MakeCard IS NULL) " +
+                                   " and((select count(id) from charges where type = 0 and meterid = '" + meterId + "') = 0 or serverDate >= (select max(serverDate) from charges where type = 0 and meterid = '" + meterId + "') ) order by Curdate desc ");
+        }
+
+        public int UpdateMonthReadingData(int MonthReadingId, decimal UsedMonthly, decimal consumptionAdjustment, decimal tarriffAdjustment, decimal LastCBM, decimal LastHealth, decimal LastServiceBox, decimal LastFixFee)
+        {
+            try
+            {
+                return new dboperation(connectionString).ExecuteNonQuery($@"update MonthReadings with (ROWLOCK) set [Read] = OldConsumption ,TotalConsumption = OldConsumption , UsedMonthly = '{UsedMonthly}' ,ConsumptionMoney = '{UsedMonthly}' ,
+                                                                            consumptionAdjustment = {consumptionAdjustment} ,tarriffAdjustment = {tarriffAdjustment} , 
+                                                                            CBMPrice = {LastCBM},Healthy = {LastHealth} ,ServiceBox = {LastServiceBox} ,FixFee = {LastFixFee}
+                                                                            where ID = {MonthReadingId}");
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public int UpdateMonthReadingConsumptionDiff(int MonthReadingId, string MeterID, int Year, int Month, decimal OldConsumption, decimal NewConsumption, decimal oldTarriffAdjustment, decimal tarriffAdjustment, decimal oldConsumptionAdjustment, decimal consumptionAdjustment, decimal consumptionAdjustmentDiff, decimal tarriffAdjustmentDiff)
+        {
+            try
+            {
+                return new dboperation(connectionString).ExecuteNonQuery($@"insert into MonthReadingConsumptionDiffs(MonthReadingId ,MeterId ,[Year] ,[Month] ,OldConsumption ,NewConsumption ,OldTarriffAdjustment ,NewTarriffAdjustment ,OldConsumptionAdjustment  ,NewConsumptionAdjustment,ConsumptionAdjustmentDiff,TarriffAdjustmentDiff  )
+                                              values('{MonthReadingId}','{MeterID}','{Year}','{Month}','{OldConsumption}','{NewConsumption}','{oldTarriffAdjustment}','{tarriffAdjustment}','{oldConsumptionAdjustment}','{consumptionAdjustment}','{consumptionAdjustmentDiff}','{tarriffAdjustmentDiff}')");
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Get meter type
+        /// </summary>
+        /// <param name="meterID">Meter identifier</param>
+        /// <returns>Meter fixed fee values</returns>
+        public int GetMeterTypeByMeterId(string meterID)
+        {
+            try
+            {
+                var query = "SELECT [MeterTypes].[MeterModelVersionID] FROM [dbo].[Meters] INNER JOIN [dbo].[MeterTypes] ON [Meters].[MeterType] = [MeterTypes].[ID] WHERE ([Meters].[MeterID] = '" + meterID + "')";
+                return new dboperation(connectionString).ReturnInt(query);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// get last charge date in system 
+        /// </summary>
+        /// <returns> date time </returns>
+        public DateTime getDateTime()
+        {
+            try
+            {
+                //var db = new dboperation();
+                //var dtAllTime = db.SelectData("select top 1 getdate() as NowDate");
+                return DateTime.Now;
+            }
+            catch
+            {
+                return System.DateTime.MinValue;
+            }
+        }
+
+        /// <summary>
+        /// Prepare add adjustment
+        /// </summary>
+        /// <param name="adjustmentCode">Adjustment code</param>
+        /// <returns>Main data need for add adjustment</returns>
+        public DataTable PrepareAddAdjustment(int adjustmentCode)
+        {
+            return new dboperation(connectionString).SelectData(" select isnull(max(id) + 1 , 1 ) as adjustmentCode ," +
+                                 " (select top 1 id from AdjustmentReasons) as DefaultAdjustmentReason ,"+
+                                 " (select id from AdjustmentTypes where Code = '" + adjustmentCode + "') as AdjustmentType ,"+
+                                 " (select top 1 MaxInstalmentsAmount from settings) as MaxInstalmentsAmount ," +
+                                 " (select top 1 DefaultInstalmentsNumber from settings) as DefaultInstalmentsNumber" +
+                                 " from Adjustments ");
+        }
+
+        public bool AddAdjustment(string MeterID, string AdjustmentValue, string MonthsCount, string MonthlyRate, string AdjustmentType, DateTime CurrentDate, string Code, string Percent, string Reason, int IsActive, int? monthReadingId = null, string description = "")
+        {
+            bool Saved = false;
+
+            try
+            {
+                if (decimal.Parse(AdjustmentValue) > 0)
+                {
+                    try
+                    {
+                        dboperation db = new dboperation(connectionString);
+                        db.objcmd.Parameters.Clear();
+                        db.objcmd.CommandType = CommandType.StoredProcedure;
+                        db.objcmd.CommandText = "addAdjustment";
+                        db.objcmd.Parameters.AddWithValue("@MeterID", MeterID);
+                        db.objcmd.Parameters.AddWithValue("@AdjustmenValue", AdjustmentValue);
+                        db.objcmd.Parameters.AddWithValue("@MonthsCount", MonthsCount);
+                        db.objcmd.Parameters.AddWithValue("@MonthlyRate", MonthlyRate);
+                        db.objcmd.Parameters.AddWithValue("@Type", AdjustmentType);
+                        db.objcmd.Parameters.AddWithValue("@CurrentDate", getDateFormated(CurrentDate));
+                        db.objcmd.Parameters.AddWithValue("@Code", Code);
+                        db.objcmd.Parameters.AddWithValue("@Percent", Percent);
+                        db.objcmd.Parameters.AddWithValue("@Reason", Reason);
+                        db.objcmd.Parameters.AddWithValue("@AdjustmentDescription", description);
+                        db.objcmd.Parameters.AddWithValue("@UserID", "");
+                        db.objcmd.Parameters.AddWithValue("@monthReadingId", monthReadingId);
+                        db.objcmd.Parameters.AddWithValue("@IsActive", IsActive);
+                        SqlParameter s = new SqlParameter("@Description", SqlDbType.Text);
+                        s.Value = "1";
+                        db.objcmd.Parameters.Add(s);
+                        db.objcmd.Parameters.AddWithValue("@TransactionID", 1); // add
+                        db.objcmd.Parameters.AddWithValue("@ComputerName", Environment.MachineName);
+
+                        if (db.ExecuteNonQuery("") > 0)
+                            return true;
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                return Saved;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string getDateFormated(System.DateTime date)
+        {
+            try
+            {
+                return string.Format("{0:D2}/{1:D2}/{2:D4}", date.Month, date.Day, date.Year);
+            }
+            catch (Exception ex)
+            {
+                //MakeExceptionLog("Utility", "getDate", ex);
+                return "";
+            }
+        }
+
+        #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ConnectDB();
+            RestartMonthReadingQuantity();
+            MessageBox.Show("Finished!");
+        }
+
+        public int RestartMonthReadingQuantity()
+        {
+            try
+            {
+                return new dboperation(connectionString).ExecuteNonQuery($@"Update MonthReadings set OldConsumption = [Read] where [Read] <> OldConsumption");
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            ConnectDB();
+
+            // Get latest reading for each meter
+            DataTable monthReadingList = ExecuteSelectQuery(" WITH latest_reading AS( " +
+                                        " SELECT m.ID, m.MeterID, m.aSysTime, m.MonthQuantity0, m.MonthQuantity1, m.MonthQuantity2, m.MonthQuantity3, " +
+                                        " m.MonthQuantity4, m.MonthQuantity5, m.MonthQuantity6, m.MonthQuantity7, m.MonthQuantity8, m.MonthQuantity9, m.MonthQuantity10, " +
+                                        " m.MonthQuantity11, ROW_NUMBER() OVER(PARTITION BY meterid ORDER BY serverDate DESC) AS readingOrder " +
+                                        " FROM WaterMetersReadings AS m where m.readingtype = 'Charge' and MeterID <> '' and m.MonthQuantity0 is not null " +
+                                        " ) SELECT * FROM latest_reading WHERE readingOrder = 1; ");
+
+            if (monthReadingList != null && monthReadingList.Rows.Count > 0)
+            {
+                for (int t = 0; t < monthReadingList.Rows.Count; t++)
+                {
+                    var i = t;
+
+                    try
+                    {
+                        if (i < monthReadingList.Rows.Count)
+                        {
+                            try
+                            {
+                                fixOldConsumptions(
+                                      int.Parse(monthReadingList.Rows[i]["ID"].ToString()),
+                                      monthReadingList.Rows[i]["MeterID"].ToString(),
+                                      System.DateTime.Parse(monthReadingList.Rows[i]["aSysTime"].ToString()),
+                                      new decimal[] {
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity0"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity1"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity2"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity3"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity4"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity5"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity6"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity7"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity8"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity9"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity10"].ToString()),
+                                      decimal.Parse(monthReadingList.Rows[i]["MonthQuantity11"].ToString())
+                                      }
+                                      );
+                            }
+                            catch (Exception ex)
+                            {
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+
+            MessageBox.Show("Finished!");
+        }
+
+        /// <summary>
+        /// Recalculate water meter month readings
+        /// </summary>
+        /// <param name="MonthReadingId">Month reading Identifier</param>
+        /// <param name="MeterID">Meter identifier</param>
+        /// <param name="meterCurrentDate">Reading date</param>
+        /// <param name="MonthQuantity">Month reading array</param>
+        /// <returns>Add result</returns>
+        public bool fixOldConsumptions(int MonthReadingId, string MeterID, DateTime meterCurrentDate, decimal [] MonthQuantity)
+        {
+            // Get last success charge server version details
+            var softwareVersionDetails = GetMeterLastSuccessChargeVersion(MeterID);
+
+            // Review last 12 month readings
+            if (softwareVersionDetails.Rows.Count > 0 && string.IsNullOrEmpty(softwareVersionDetails.Rows[0]["Softwareversion"].ToString()))
+            {
+                int month = meterCurrentDate.Month;
+                int year = meterCurrentDate.Year;
+                int inc = 1;
+                int StartMonth = 0;
+
+                if (meterCurrentDate.Month == 1)
+                {
+                    StartMonth = month = 0;
+                }
+                else
+                {
+                    StartMonth = month = meterCurrentDate.Month - 1;
+                }
+
+                // Fix old monthreadings
+                for (int monthCount = 0; monthCount < 12; monthCount++)
+                {
+                    if (MeterID.Split('-').Length - 1 > 1)
+                    {
+                        #region fix new meter
+
+                        meterCurrentDate = meterCurrentDate.AddMonths(-1);
+
+                        var query2 = $@"if exists(select * from MonthReadings with(nolock) where MeterId = '{MeterID}' and [Year] = '{meterCurrentDate.Year}' and [Month] = '{meterCurrentDate.Month}' and OldConsumption <> '{MonthQuantity[monthCount]}')
+                                         begin
+                                             update MonthReadings with (ROWLOCK)  set OldConsumption = {MonthQuantity[monthCount]} where ID = (select top 1 Id from MonthReadings where [Year]={meterCurrentDate.Year} and [Month]={meterCurrentDate.Month} and MeterID = '{MeterID}')
+                                         End";
+                        new dboperation(connectionString).ExecuteNonQuery(query2);
+
+                        #endregion
+                    }
+                    else
+                    {
+                        #region fix old meter
+
+                        if (month == 0)
+                        {
+                            year = year - 1;
+                        }
+
+                        var query2 = $@"if exists(select * from MonthReadings with(nolock) where MeterId = '{MeterID}' and [Year] = '{year}' and [Month] = '{(month == 0 ? 12 : month)}' and OldConsumption <> '{MonthQuantity[month]}')
+                                             begin
+                                             update MonthReadings with (ROWLOCK)  set OldConsumption = {MonthQuantity[month]} where ID = (select top 1 Id from MonthReadings where [Year]={year} and [Month]={(month == 0 ? 12 : month)} and MeterID = '{MeterID}')
+                                             End";
+                        new dboperation(connectionString).ExecuteNonQuery(query2);
+
+                        if (month == 0)
+                        {
+                            inc = 1;
+                            month = StartMonth + inc;
+                            StartMonth = 0;
+                        }
+                        else if (StartMonth > 0)
+                        {
+                            inc = -1;
+                            month = month + inc;
+                        }
+                        else
+                        {
+                            month = month + inc;
+                        }
+
+                        #endregion
+                    }
+                }
+
+                // Update last success charge server version
+                var query3 = $@"if exists(select * from charges with(nolock) where id = {softwareVersionDetails.Rows[0]["id"].ToString()})
+                                begin
+                                    update charges with (ROWLOCK)  set Softwareversion = 'FixTool' where id = {softwareVersionDetails.Rows[0]["id"].ToString()}
+                                End";
+                new dboperation(connectionString).ExecuteNonQuery(query3);
+
+                // Call fix RecalcWaterMonthReadingsWithNewQuantity
+            }
+
+            return true;
         }
 
     }
