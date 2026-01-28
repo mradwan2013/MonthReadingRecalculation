@@ -8,9 +8,11 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>MonthReadingRecalculation</RootNamespace>
     <AssemblyName>MonthReadingRecalculation</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -23,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -49,7 +50,12 @@
     <StartupObject>MonthReadingRecalculation.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SmartWaterMeter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalLibraries\SmartWaterMeter.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -71,6 +77,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Utility.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
@@ -90,5 +97,33 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ExternalLibraries\Card Libraries\COMDLL.DLL" />
+    <Content Include="ExternalLibraries\Card Libraries\D8Reader.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\dcrf32.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\GetDiskSerial.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\JDMultiMifareDLL.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\MasterCom.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\MasterRD.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\Microsoft.VisualBasic.PowerPacks.Vs.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\MifareDll.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\scardsyn.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\SingleInstancing.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMCardTran.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMCardTranV8.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMDLL.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMDLLV8.dll" />
+    <Content Include="ExternalLibraries\Card Libraries\Tpcom32.dll" />
+    <Content Include="ExternalLibraries\SmartWaterMeter.dll" />
+    <Content Include="ExternalLibraries\TemplatesProvider.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo Copying "$(SolutionDir)\ExternalLibraries\Card Libraries\*.dll" to "$(SolutionDir)\bin\Debug\"
+copy /y "$(SolutionDir)\ExternalLibraries\Card Libraries\*.dll" "$(SolutionDir)\bin\Debug"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

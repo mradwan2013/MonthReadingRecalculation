@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SmartWaterMeter;
+using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
@@ -12,6 +14,24 @@ namespace MonthReadingRecalculation
         public string connectionString = "";
         private BackgroundWorker worker;
         delegate void SetTextCallback(string text, bool append = false);
+        DataTable settingtbl;
+        ushort AreaNo;
+        decimal CurrencyRatio;
+        string UserName;
+        string strVersion;
+        string VendingStationName;
+        string DBNumber;
+        DataTable dt = new DataTable();
+        private uint CardSN = 0;
+        int Transactionid = 0;
+        char[] meterstatebin;
+        int BatteryStatus = 0;
+        string resopn = "";
+        string batresopn = "حالة البطارية : جيدة ";
+        string ValveStatus = "";
+        bool bValveStatus = false;
+        int CloseValveReason = 0;
+        VersionCountry Version_Country = VersionCountry.WaterRFIDEGYPTTENDER;
 
         public FrmRecalculate()
         {
@@ -642,7 +662,7 @@ namespace MonthReadingRecalculation
                             {
                                 try
                                 {
-                                    UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()));
+                                    //  UpdateWaterMonthReadings(int.Parse(monthReadingList.Rows[i]["ID"].ToString()));
                                 }
                                 catch
                                 {
@@ -991,16 +1011,15 @@ namespace MonthReadingRecalculation
 
         public void ConnectDB()
         {
-            // Init DB
-            //textBox1.Text = ".\\MZSQLSERVER";
-            //textBox2.Text = "WaterMenoufiyaGMM";
-            //textBox3.Text = "sa";
-            //textBox4.Text = "P@$$w0rd";
+            string server = string.IsNullOrEmpty(textBox1.Text) ? ConfigurationManager.AppSettings["Server"].ToString() : textBox1.Text;
+            string database = string.IsNullOrEmpty(textBox2.Text) ? ConfigurationManager.AppSettings["Database"].ToString() : textBox2.Text;
+            string userName = string.IsNullOrEmpty(textBox3.Text) ? ConfigurationManager.AppSettings["UserName"].ToString() : textBox3.Text;
+            string password = string.IsNullOrEmpty(textBox4.Text) ? ConfigurationManager.AppSettings["Password"].ToString() : textBox4.Text;
 
-            StringBuilder Con = new StringBuilder("Password=" + textBox4.Text);
-            Con.Append(";Persist Security Info=True;User ID=" + textBox3.Text);
-            Con.Append(";Initial Catalog=" + textBox2.Text);
-            Con.Append(";MultipleActiveResultSets=True;Max Pool Size=30000;Data Source=" + textBox1.Text + ";");
+            StringBuilder Con = new StringBuilder("Password=" + password);
+            Con.Append(";Persist Security Info=True;User ID=" + userName);
+            Con.Append(";Initial Catalog=" + database);
+            Con.Append(";MultipleActiveResultSets=True;Max Pool Size=30000;Data Source=" + server + ";");
             this.connectionString = Con.ToString();
         }
 
@@ -2153,7 +2172,6 @@ namespace MonthReadingRecalculation
             }
             catch (Exception ex)
             {
-                //MakeExceptionLog("Utility", "getDate", ex);
                 return "";
             }
         }
@@ -2333,5 +2351,398 @@ namespace MonthReadingRecalculation
             return true;
         }
 
+        /// <summary>
+        /// Read Retrieval Card
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ConnectDB();
+
+            string sql = " SELECT getdate() as currentServerDate ,LoginTrials,ThirdPartyCommission,DataBaseNumber,CurrencyRatio,DefaultOperation,"+
+                         " AutoLockTime,MaxOfflineTransaction , offlineCheckMin,MaxInstalmentsAmount,ReplaceCardFees,DefaultInstalmentsNumber, ExpirePeriod," +
+                         " UNameOperator,UNameValue,UnameIsActive,PassOperator,PassValue,PassIsActive,changePasswordfirsttime," +
+                         " AllowChargeOn , AllowChargeOff , SellingDate , RFDBNum ,settlementType , settlementDayCount , EnableCashierBalance,"+
+                         " GracePeriod ,CompanyCode ,SoftwareVersion ,StartHour , StartMin ,EndHour,EndMin , ReportConnectionString, WarningNotificationLicence,ChangeReplaceCardFee"+
+                         " FROM Settings with(nolock)";
+            settingtbl = ExecuteSelectQuery(sql);
+
+            ReadAndSave();
+        }
+
+        private void ReadAndSave()
+        {
+            DataTable dt = new DataTable();
+
+            // Load tbl
+            if (!dt.Columns.Contains("Index"))
+                dt.Columns.Add("Index");
+
+            if (!dt.Columns.Contains("MeterId"))
+                dt.Columns.Add("MeterId");
+
+            if (!dt.Columns.Contains("Consumer Type"))
+                dt.Columns.Add("Consumer Type");
+
+            if (!dt.Columns.Contains("Buy Times"))
+                dt.Columns.Add("Buy Times");
+
+            if (!dt.Columns.Contains("Remain Waring"))
+                dt.Columns.Add("Remain Waring");
+
+            if (!dt.Columns.Contains("Consumed Credit"))
+                dt.Columns.Add("Consumed Credit");
+
+            if (!dt.Columns.Contains("Consumed Credit Mothly"))
+                dt.Columns.Add("Consumed Credit Mothly");
+
+            if (!dt.Columns.Contains("Remain Credit"))
+                dt.Columns.Add("Remain Credit");
+
+            if (!dt.Columns.Contains("Quantity Total"))
+                dt.Columns.Add("Quantity Total");
+
+            if (!dt.Columns.Contains("This Month Money"))
+                dt.Columns.Add("This Month Money");
+
+            if (!dt.Columns.Contains("This Month Quantity"))
+                dt.Columns.Add("This Month Quantity");
+
+            if (!dt.Columns.Contains("LastOpenDate"))
+                dt.Columns.Add("LastOpenDate");
+
+            if (!dt.Columns.Contains("aSysTime"))
+                dt.Columns.Add("aSysTime");
+
+            if (!dt.Columns.Contains("BattaryStatus"))
+                dt.Columns.Add("BattaryStatus");
+
+            //if (!dt.Columns.Contains("Index"))
+            //    dt.Columns.Add("مسلسل");
+
+            //if (!dt.Columns.Contains("MeterId"))
+            //    dt.Columns.Add("رقم العداد");
+
+            //if (!dt.Columns.Contains("Consumer Type"))
+            //    dt.Columns.Add("كود فئة العميل");
+
+            //if (!dt.Columns.Contains("Buy Times"))
+            //    dt.Columns.Add("رقم الشحنة");
+
+            //if (!dt.Columns.Contains("Remain Waring"))
+            //    dt.Columns.Add("حد الفصل");
+
+            //if (!dt.Columns.Contains("Consumed Credit"))
+            //    dt.Columns.Add("الرصيد المستهلك");
+
+            //if (!dt.Columns.Contains("Consumed Credit Mothly"))
+            //    dt.Columns.Add("الرصيد المستهلك الشهرى");
+
+            //if (!dt.Columns.Contains("Remain Credit"))
+            //    dt.Columns.Add("الرصيد المتبقي");
+
+            //if (!dt.Columns.Contains("Quantity Total"))
+            //    dt.Columns.Add("الكميه");
+
+            //if (!dt.Columns.Contains("This Month Money"))
+            //    dt.Columns.Add("التقفيل الشهرى");
+
+            //if (!dt.Columns.Contains("This Month Quantity"))
+            //    dt.Columns.Add("الكميه الشهريه");
+
+            //if (!dt.Columns.Contains("LastOpenDate"))
+            //    dt.Columns.Add("اخر تاريخ فتح الغطاء");
+
+            //if (!dt.Columns.Contains("aSysTime"))
+            //    dt.Columns.Add("شهر القراءة");
+
+            //if (!dt.Columns.Contains("BattaryStatus"))
+            //    dt.Columns.Add("حاله البطاريه");
+
+            dataGridView1.DataSource = dt;
+
+            if (settingtbl != null && settingtbl.Rows.Count > 0)
+            {
+                AreaNo = ushort.Parse(settingtbl.Rows[0]["RFDBNum"].ToString());
+
+                try
+                {
+                    CurrencyRatio = Convert.ToDecimal(settingtbl.Rows[0]["CurrencyRatio"]);
+                }
+                catch
+                {
+                    CurrencyRatio = 1;
+                }
+
+                DBNumber = settingtbl.Rows[0]["DataBaseNumber"].ToString();
+                UserName = "";
+                strVersion = settingtbl.Rows[0]["SoftwareVersion"].ToString();
+                VendingStationName = "";
+                Version_Country = VersionCountry.WaterRFIDEGYPTTENDER;
+            }
+
+            uint CardSN = 0;
+            int Transactionid = 0;
+            char[] meterstatebin=null;
+            int BatteryStatus = 0;
+            string resopn = "";
+            string batresopn = "حالة البطارية : جيدة ";
+            string ValveStatus = "";
+            bool bValveStatus = false;
+            int CloseValveReason = 0;
+
+            SmartWaterMeter.SmartWaterMeter RFIDWM = new SmartWaterMeter.SmartWaterMeter(AreaNo, CurrencyRatio, UserName, strVersion, VendingStationName);
+
+            try
+            {
+                int vc = (int)Version_Country;
+                string ret = "";
+                dt.Rows.Clear();
+                DBRFID objRFID = new DBRFID();
+                ReadCard rc = new ReadCard();
+                dboperation db = new dboperation();
+
+                ret = RFIDWM.doGetCardType(SmartWaterMeter.OperationType.RFID, ref vc);
+
+                if (ret != "F")
+                {
+                    if (Version_Country == VersionCountry.WaterRFIDEGYPTTENDER)
+                    {
+                        // Read vendor
+                        var meterType = SmartWaterMeter.SmartWaterMeter.ReadVendorIdentifier();
+
+                        CardSN = RFIDWM.aCardSN;
+                        objRFID.MeterName = (meterType == (int)MeterTypeEnum.Water_EGRFID_V8_1_25_Inch) ? (int)MeterTypeEnum.Water_EGRFID_V8_1_25_Inch : (int)MeterTypeEnum.Water_EGRFID;
+
+                        rc.CardType = Convert.ToInt16(ret.ToString());
+                        RFIDWM.rc.CardType = rc.CardType;
+
+                        switch (rc.CardType)
+                        {
+                            // Retrieval card
+                            case 9:
+                                RFIDWM.index = 0;
+                                rc = RFIDWM.ReadGeneralCards(objRFID);
+
+                                bool isRead = false;
+                                string insertQry = string.Empty;
+                                string LastOpenDate = string.Empty; ;
+                                int MeterphaseNo;
+                                int gucode;
+
+                                if (rc.ret == 1)
+                                {
+                                    DataRow dr;
+
+                                    for (byte i = 0; i < rc.aCount; i++)
+                                    {
+                                        BatteryStatus = 0;
+                                        resopn = "";
+                                        batresopn = "حالة البطارية : جيدة ";
+                                        ValveStatus = "";
+                                        bValveStatus = false;
+                                        CloseValveReason = 0;
+
+                                        MeterphaseNo = 0;
+                                        gucode = 0;
+
+                                        if (rc.aConsumerID.ToString() != "0")
+                                        {
+                                            LastOpenDate = DateTime.Parse(rc.LastOpenDate.ToString()).ToString();
+
+                                            if (DateTime.Parse(LastOpenDate.ToString()) < new DateTime(2015, 1, 1))
+                                                LastOpenDate = string.Empty;
+
+                                            var activity = "0";
+
+
+                                            var sysDate = DateTime.Parse(rc.aSysTime.ToString());
+                                            Utility.GetMeterCatagoryData((DBNumber + "-" + rc.aConsumerID.ToString()), ref activity, ref MeterphaseNo, ref gucode, sysDate);
+                                            activity = Utility.GetActivityNameByID(activity);
+                                        
+                                            if (!isRead)
+                                            {
+                                                insertQry = $@"IF NOT EXISTS (SELECT ID FROM ReadMassRetrivalCard WITH(NOLOCK) WHERE [CardserialNo] = '{rc.aCardSN}' and Transactionid = {Transactionid} and meterid =  '{rc.aConsumerID}' and acount = {RFIDWM.index})
+                                                             INSERT INTO [dbo].[ReadMassRetrivalCard]
+                                                             ([CardserialNo], acount, [ReadingDate], [Transactionid], [MeterID], [MeterState2], [AreaNo], [aConsumerType], [aBuyTimes],
+                                                             [aWorkTimeStartHour], [aWorkTimeStartMin], [aWorkTimeEndHour], [aWorkTimeEndMin], [aBatErrorTimes], [aMegnaticTimes], [aValveErrorTimes], [aOpenBatteryTimes],
+                                                             [LastOpenDate], [aSysTime], [aBitWeekEndFri], [aBitWeekEndSat], [aOverdraftThreshold], [aRemainWaring], [aConsumedCredit],
+                                                             [aConsumedCreditMothly], [aOverdraftCredit], [aRemainCredit], [aQuantityTotal], [aQuantityTotalNeg], [ThisMonthMoney], [ThisMonthQuantity],
+                                                             CardActivity, NewActivity, CardPhaseNo, NewPhaseNo, CardNoofUnits, NewNoofUnits, [MonthQuantity0], [MonthQuantity1], [MonthQuantity2], [MonthQuantity3], [MonthQuantity4], [MonthQuantity5],
+                                                             [MonthQuantity6], [MonthQuantity7], [MonthQuantity8], [MonthQuantity9], [MonthQuantity10], [MonthQuantity11])
+                                                             VALUES ('{rc.aCardSN}', {RFIDWM.index}, GETDATE(), {Transactionid}, '{rc.aConsumerID}', '{rc.aMeterState}', {rc.AreaNo}, {rc.aConsumerType}, {rc.aBuyTimesMeter},
+                                                             {rc.aWorkTimeStartHour}, {rc.aWorkTimeStartMin}, {rc.aWorkTimeEndHour}, {rc.aWorkTimeEndMin},
+                                                             {rc.aBatErrorTimes}, {rc.aMegnaticTimes}, {rc.aValveErrorTimes}, {rc.aOpenBatteryTimes},
+                                                             CONVERT(DATETIME, '{LastOpenDate}', 103), CONVERT(DATETIME, '{rc.aSysTime}', 103),
+                                                             {(rc.aBitWeekEndFri ? "1" : "0")}, {(rc.aBitWeekEndSat ? "1" : "0")}, {rc.aOverdraftThreshold}, {rc.aRemainWaring},
+                                                             {rc.aConsumedCredit}, {rc.aConsumedCreditMothly}, {rc.aOverdraftCredit},
+                                                             {rc.aRemainCredit}, {rc.aQuantityTotal}, {rc.aQuantityTotalNeg},
+                                                             {rc.ThisMonthMoney}, {rc.ThisMonthQuantity}, '{activity}', '{activity}', {MeterphaseNo}, {MeterphaseNo}, {gucode}, {gucode},
+                                                             {rc.MonthQuantity[0]}, {rc.MonthQuantity[1]}, {rc.MonthQuantity[2]}, {rc.MonthQuantity[3]}, {rc.MonthQuantity[4]}, {rc.MonthQuantity[5]}, {rc.MonthQuantity[6]}, {rc.MonthQuantity[7]}, {rc.MonthQuantity[8]}, {rc.MonthQuantity[9]}, {rc.MonthQuantity[10]}, {rc.MonthQuantity[11]})
+                                                             UPDATE MassRetrivalCard WITH(ROWLOCK) SET reading = 1 WHERE Transactionid = {Transactionid} AND meterid =  '{rc.aConsumerID}'";
+
+
+                                                int noOfAfftectedRwos = db.ExecuteNonQuery(insertQry.ToString());
+                                            }
+
+                                            if (rc.ret == 1)
+                                            {
+                                                // Add water meter reading
+                                                //WaterMeterreading(rc);
+
+                                                // Add month reading
+                                                //bool retmonthers = Utility.addMonthReadingtoDB(rc, false, meterType);
+
+                                                // Add grid row
+                                                dr = dt.NewRow();
+
+                                                Utility.Meterstate(rc.aMeterState, true, ref bValveStatus, ref CloseValveReason, ref meterstatebin, ref BatteryStatus, ref resopn, ref ValveStatus, ref batresopn);
+                                                dr["index"] = RFIDWM.index.ToString();
+                                                dr["MeterID"] = rc.aConsumerID.ToString();
+                                                dr["Consumer Type"] = rc.aConsumerType.ToString();
+                                                dr["Buy Times"] = rc.aBuyTimesMeter.ToString();
+                                                dr["Remain Waring"] = rc.aRemainWaring.ToString();
+                                                dr["Consumed Credit"] = rc.aConsumedCredit.ToString();
+                                                dr["Consumed Credit Mothly"] = rc.aConsumedCreditMothly.ToString();
+                                                dr["Remain Credit"] = rc.aRemainCredit.ToString();
+                                                dr["Quantity Total"] = rc.QuantityTotal.ToString();
+                                                dr["This Month Money"] = rc.ThisMonthMoney.ToString();
+                                                dr["This Month Quantity"] = rc.ThisMonthQuantity.ToString();
+                                                dr["LastOpenDate"] = LastOpenDate;
+                                                dr["aSysTime"] = rc.aSysTime.ToString();
+                                                dr["BattaryStatus"] = BatteryStatus.ToString();
+                                                dt.Rows.Add(dr);
+                                            }
+                                        }
+
+                                        RFIDWM.index = (byte)(i + 1);
+                                        rc = RFIDWM.ReadGeneralCards(objRFID);
+                                    }
+                                }
+
+                                MessageBox.Show("Done");
+
+                                break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        //private void WaterMeterreading(ReadCard rc)
+        //{
+        //    try
+        //    {
+        //        dboperation db = new dboperation();
+        //        string meter = rc.aConsumerID.ToString();
+        //        string StrMeterId = Utility.GetMeterID2(meter);
+        //        BatteryStatus = 0;
+        //        resopn = "";
+        //        batresopn = "حالة البطارية : جيدة ";
+        //        ValveStatus = "";
+        //        bValveStatus = false;
+        //        CloseValveReason = 0;
+        //        Utility.Meterstate(rc.aMeterState, true, ref bValveStatus, ref CloseValveReason, ref meterstatebin, ref BatteryStatus, ref resopn, ref ValveStatus, ref batresopn);
+        //        int aSysTimeInt = rc.aSysTime.Year * 10000;
+        //        aSysTimeInt += rc.aSysTime.Month * 100;
+        //        aSysTimeInt += rc.aSysTime.Day;
+        //        DateTime LastOpenDate = DateTime.Parse(rc.LastOpenDate.ToString());
+        //        string sLastOpenDate = "";
+
+        //        try
+        //        {
+        //            if (LastOpenDate == new DateTime())
+        //            {
+        //                sLastOpenDate = null;
+        //            }
+        //            else
+        //            {
+        //                sLastOpenDate = LastOpenDate.ToString();
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            sLastOpenDate = null;
+        //        }
+
+        //        rc.customIDs = Utility.GetCustomerID(StrMeterId);
+        //        string sqlret = "select  top 1  convert( nvarchar , aQuantityTotal ) as Prev,   GuCode , Sewage  from WaterMetersReadings where MeterID = '" + StrMeterId +
+        //                        "' and  convert(datetime ,  aSysTime , 103)   <  convert(datetime , '" + rc.aSysTime.ToString() + "'  , 103)  order by convert(datetime ,  aSysTime , 103)  desc  ";
+
+        //        double summonth = 0;
+        //        int prevGuCode = 0;
+        //        int prevSewage = 0;
+        //        double prevcons = 0;
+        //        DataTable Prevdt = db.SelectData(sqlret);
+
+        //        if (Prevdt.Rows.Count > 0)
+        //        {
+        //            sqlret = Prevdt.Rows[0]["Prev"].ToString();
+        //            prevGuCode = int.Parse(Prevdt.Rows[0]["GuCode"].ToString());
+        //            prevSewage = int.Parse(Prevdt.Rows[0]["Sewage"].ToString());
+        //            prevcons = double.Parse(sqlret == "" ? "0" : sqlret);
+
+        //            if (prevcons > rc.QuantityTotal)
+        //                prevcons = 0;
+
+        //            sqlret = "select convert(nvarchar ,  sum( aQuantityTotal - PrevQuantityTotal)  )  from WaterMetersReadings where MeterID = '" +
+        //                        StrMeterId + "' and  convert(datetime ,  aSysTime , 103)   <  convert(datetime , '" + rc.aSysTime.ToString() +
+        //                      "'  , 103) and year (convert(datetime ,  aSysTime , 103) ) *100 + MONTH( convert(datetime ,  aSysTime , 103) ) = " +
+        //                      " year (convert(datetime ,  '" + rc.aSysTime.ToString() + "' , 103)  ) *100 + MONTH( convert(datetime ,  '" + rc.aSysTime.ToString() + "' , 103)  ) ";
+
+        //            sqlret = db.ReturnStr(sqlret).ToString();
+        //            summonth = double.Parse(sqlret == "" ? "0" : sqlret);
+        //        }
+
+        //        DataTable dtTariff = new DataTable();
+        //        DataTable meterdata = db.SelectData("select activityid , GuCode , PhaseNo  from meters with(nolock) where meterid ='" + StrMeterId + "'");
+        //        string ActivityID = meterdata.Rows[0]["activityid"].ToString();
+        //        int GuCode = int.Parse(meterdata.Rows[0]["GuCode"].ToString());
+        //        int PhaseNo = int.Parse(meterdata.Rows[0]["PhaseNo"].ToString());
+
+        //        dtTariff = Utility.GetTariff(ActivityID);
+        //        decimal[] price = Utility.getWaterDetail((decimal)(rc.QuantityTotal - prevcons), GuCode, PhaseNo, dtTariff);
+        //        decimal EstimatedValue = Utility.calcWaterMoneyIncludeUnits(decimal.Parse(rc.ThisMonthQuantity.ToString()), dtTariff, GuCode);
+        //        decimal aoverdraftCredit;
+        //        if (!decimal.TryParse(rc.aOverdraftCredit.ToString(), out aoverdraftCredit))
+        //            aoverdraftCredit = 0;
+
+
+        //        decimal PositiveCredit = EstimatedValue - aoverdraftCredit;
+        //        decimal Positiveconsumption = Utility.calcWaterReadingQuantityIncludeUnits(PositiveCredit, dtTariff, GuCode, PhaseNo);
+        //        decimal friendlyCBM = decimal.Parse(rc.ThisMonthQuantity.ToString()) - Positiveconsumption;
+        //        decimal[] friendlyprice = Utility.getWaterDetailByCreditandConsumption(friendlyCBM, aoverdraftCredit, ActivityID);
+        //        rc.aSysTime.AddSeconds(-rc.aSysTime.Second);
+
+        //        SellingCardRepository _sellingCardRepository = new SellingCardRepository();
+        //        var result = Utility.InsertWaterReading(rc.aConsumerType.ToString(), (rc.aRemainCredit + rc.aConsumedCredit).ToString(), "", "MassRetrivalCard", StrMeterId, rc.customIDs, rc.aMeterState.ToString(),
+        //            rc.aOverdraftCredit.ToString(),
+        //            rc.aQuantityTotalNeg.ToString(), rc.aSysTime.AddSeconds(-rc.aSysTime.Second).ToString(),
+        //             BatteryStatus.ToString(), GuCode.ToString(), rc.aBuyTimesMeter.ToString(), rc.ThisMonthQuantity.ToString(),
+        //             rc.aConsumedCredit.ToString(), rc.QuantityTotal.ToString(), rc.ThisMonthQuantity.ToString(), rc.aValveErrorTimes.ToString(),
+        //             rc.aOpenBatteryTimes.ToString(), rc.aOpenCoverTimes.ToString(), rc.aSysTime.ToString(), aSysTimeInt.ToString(), sLastOpenDate,
+        //             ActivityID, PhaseNo.ToString(), CloseValveReason.ToString(), prevcons.ToString(), price[0].ToString(), price[1].ToString(), price[2].ToString(),
+        //             friendlyCBM.ToString(), friendlyprice[0].ToString(), friendlyprice[1].ToString(), friendlyprice[2].ToString(),
+        //             bValveStatus, rc.aMegnaticTimes.ToString(), rc.magnaticDate.ToString(), rc.LastBatteryDate.ToString(),
+        //             rc.ValveErrorDate != null ? rc.ValveErrorDate.Value.ToString() : string.Empty,
+        //             rc.ClosedValveDate != null ? rc.ClosedValveDate.Value.ToString() : string.Empty,
+        //             rc.OpenValveDate != null ? rc.OpenValveDate.Value.ToString() : string.Empty,
+        //             rc.aRemainCredit, rc.AreaNo, rc.MonthQuantity, rc.UsedMonthly);
+
+        //        if (!result)
+        //        {
+        //            throw new Exception("frmSellingCard:WaterMeterReading : failed to add water meter reading");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //Utility.MakeExceptionLog("frmSellingCard", "WaterMeterReading", ex);
+        //    }
+        //}
     }
 }
+
