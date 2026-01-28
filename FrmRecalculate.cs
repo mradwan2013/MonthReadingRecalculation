@@ -1,11 +1,13 @@
 ﻿using SmartWaterMeter;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace MonthReadingRecalculation
 {
@@ -1011,10 +1013,10 @@ namespace MonthReadingRecalculation
 
         public void ConnectDB()
         {
-            string server = string.IsNullOrEmpty(textBox1.Text) ? ConfigurationManager.AppSettings["Server"].ToString() : textBox1.Text;
-            string database = string.IsNullOrEmpty(textBox2.Text) ? ConfigurationManager.AppSettings["Database"].ToString() : textBox2.Text;
-            string userName = string.IsNullOrEmpty(textBox3.Text) ? ConfigurationManager.AppSettings["UserName"].ToString() : textBox3.Text;
-            string password = string.IsNullOrEmpty(textBox4.Text) ? ConfigurationManager.AppSettings["Password"].ToString() : textBox4.Text;
+            string server = ConfigurationManager.AppSettings["Server"].ToString();
+            string database = ConfigurationManager.AppSettings["Database"].ToString();
+            string userName = ConfigurationManager.AppSettings["UserName"].ToString();
+            string password = ConfigurationManager.AppSettings["Password"].ToString();
 
             StringBuilder Con = new StringBuilder("Password=" + password);
             Con.Append(";Persist Security Info=True;User ID=" + userName);
@@ -2484,7 +2486,7 @@ namespace MonthReadingRecalculation
 
             uint CardSN = 0;
             int Transactionid = 0;
-            char[] meterstatebin=null;
+            char[] meterstatebin = null;
             int BatteryStatus = 0;
             string resopn = "";
             string batresopn = "حالة البطارية : جيدة ";
@@ -2560,7 +2562,7 @@ namespace MonthReadingRecalculation
                                             var sysDate = DateTime.Parse(rc.aSysTime.ToString());
                                             Utility.GetMeterCatagoryData((DBNumber + "-" + rc.aConsumerID.ToString()), ref activity, ref MeterphaseNo, ref gucode, sysDate);
                                             activity = Utility.GetActivityNameByID(activity);
-                                        
+
                                             if (!isRead)
                                             {
                                                 insertQry = $@"IF NOT EXISTS (SELECT ID FROM ReadMassRetrivalCard WITH(NOLOCK) WHERE [CardserialNo] = '{rc.aCardSN}' and Transactionid = {Transactionid} and meterid =  '{rc.aConsumerID}' and acount = {RFIDWM.index})
@@ -2630,6 +2632,52 @@ namespace MonthReadingRecalculation
             }
             catch
             {
+            }
+        }
+
+        /// <summary>
+        /// Confirm meters exists
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.Rows.Count > 0)
+            {
+                // Read All Distinct Meters Ids
+                HashSet<string> meterIds = new HashSet<string>();
+
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    // Skip the empty new row at the bottom
+                    if (row.IsNewRow)
+                        continue;
+
+                    // Access column by INDEX if name causes issues
+                    var cellValue = row.Cells["MeterID"].Value; // <-- change index if needed
+
+                    if (cellValue != null && cellValue != DBNull.Value)
+                    {
+                        meterIds.Add(cellValue.ToString());
+                    }
+                }
+
+                List<string> distinctMeterIds = meterIds.ToList();
+
+                // Get not exits meters
+                string inClause = string.Join(",", distinctMeterIds.Select(m => $"'{m}'"));
+                string sql = $@" SELECT MeterNumber FROM meters with (nolock) WHERE MeterNumber IN ({inClause})
+                               AND Status = 'On Customer'";
+                List<string> validMeters = ExecuteSelectQuery(sql).AsEnumerable().Select(r => r.Field<string>("MeterNumber")).ToList();
+                List<string> invalidMeters = distinctMeterIds.Where(m => !validMeters.Contains(m)).ToList();
+
+                // Load invalid meters tbl
+                if (!dt.Columns.Contains("MeterNo"))
+                    dt.Columns.Add("MeterNo");
+
+                dataGridView2.DataSource = invalidMeters.Select(m => new { MeterNo = m }).ToList();
+
+                tabControl1.SelectTab("MeterNotExistsTab");
             }
         }
 
