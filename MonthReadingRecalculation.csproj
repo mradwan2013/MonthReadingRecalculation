@@ -119,6 +119,7 @@
     <Content Include="ExternalLibraries\Card Libraries\Tpcom32.dll" />
     <Content Include="ExternalLibraries\SmartWaterMeter.dll" />
     <Content Include="ExternalLibraries\TemplatesProvider.dll" />
+    <Content Include="main_logo100_7QN_2.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
