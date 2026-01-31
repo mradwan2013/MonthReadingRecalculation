@@ -60,9 +60,11 @@ namespace MonthReadingRecalculation
             this.button5 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.button3 = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
+            this.MonitorLogs = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.MonitorLogsText = new System.Windows.Forms.RichTextBox();
             this.UpdateReviewCardDate = new System.Windows.Forms.TabPage();
             this.ReviewCardProgressLbl = new System.Windows.Forms.Label();
             this.ReviewCardProgressBar = new System.Windows.Forms.ProgressBar();
@@ -93,6 +95,11 @@ namespace MonthReadingRecalculation
             this.RecalcQuantityQueryTxt = new System.Windows.Forms.RichTextBox();
             this.RecalcQuantityBtn = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.MtrTarget = new System.Windows.Forms.TextBox();
+            this.ChNoTarget = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.CancelChTab.SuspendLayout();
             this.RecalcMrTab.SuspendLayout();
             this.UpdateMrTab.SuspendLayout();
@@ -101,10 +108,12 @@ namespace MonthReadingRecalculation
             this.tabControl1.SuspendLayout();
             this.ReadRetrievalTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.MonitorLogs.SuspendLayout();
             this.UpdateReviewCardDate.SuspendLayout();
             this.UpdateTarrifDifference.SuspendLayout();
             this.FixSewageCalc.SuspendLayout();
             this.CorrectReadingQuantity.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelChTab
@@ -328,7 +337,7 @@ namespace MonthReadingRecalculation
             this.MeterNotExistsTab.Padding = new System.Windows.Forms.Padding(3);
             this.MeterNotExistsTab.Size = new System.Drawing.Size(1018, 480);
             this.MeterNotExistsTab.TabIndex = 0;
-            this.MeterNotExistsTab.Text = "Meter Not Exists";
+            this.MeterNotExistsTab.Text = "Not Valid Meters";
             this.MeterNotExistsTab.UseVisualStyleBackColor = true;
             // 
             // label2
@@ -353,13 +362,7 @@ namespace MonthReadingRecalculation
             // 
             this.tabControl1.Controls.Add(this.ReadRetrievalTab);
             this.tabControl1.Controls.Add(this.MeterNotExistsTab);
-            this.tabControl1.Controls.Add(this.UpdateMrTab);
-            this.tabControl1.Controls.Add(this.RecalcMrTab);
-            this.tabControl1.Controls.Add(this.CancelChTab);
-            this.tabControl1.Controls.Add(this.UpdateReviewCardDate);
-            this.tabControl1.Controls.Add(this.UpdateTarrifDifference);
-            this.tabControl1.Controls.Add(this.FixSewageCalc);
-            this.tabControl1.Controls.Add(this.CorrectReadingQuantity);
+            this.tabControl1.Controls.Add(this.MonitorLogs);
             this.tabControl1.Location = new System.Drawing.Point(21, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -368,11 +371,11 @@ namespace MonthReadingRecalculation
             // 
             // ReadRetrievalTab
             // 
+            this.ReadRetrievalTab.Controls.Add(this.groupBox1);
             this.ReadRetrievalTab.Controls.Add(this.button6);
             this.ReadRetrievalTab.Controls.Add(this.button5);
             this.ReadRetrievalTab.Controls.Add(this.button4);
             this.ReadRetrievalTab.Controls.Add(this.dataGridView1);
-            this.ReadRetrievalTab.Controls.Add(this.progressBar1);
             this.ReadRetrievalTab.Controls.Add(this.button3);
             this.ReadRetrievalTab.Controls.Add(this.label12);
             this.ReadRetrievalTab.Location = new System.Drawing.Point(4, 25);
@@ -384,29 +387,31 @@ namespace MonthReadingRecalculation
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(568, 391);
+            this.button6.Location = new System.Drawing.Point(568, 402);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(141, 66);
             this.button6.TabIndex = 32;
             this.button6.Text = "Insert Meters Last Charge";
             this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(399, 391);
+            this.button5.Location = new System.Drawing.Point(399, 402);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(141, 66);
             this.button5.TabIndex = 31;
             this.button5.Text = "Update Meters ChargeNo";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(232, 391);
+            this.button4.Location = new System.Drawing.Point(232, 402);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(141, 66);
             this.button4.TabIndex = 30;
-            this.button4.Text = "Load Meters Not Exists";
+            this.button4.Text = "Load Not Valid Meters";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -417,15 +422,8 @@ namespace MonthReadingRecalculation
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 26;
-            this.dataGridView1.Size = new System.Drawing.Size(966, 282);
+            this.dataGridView1.Size = new System.Drawing.Size(966, 315);
             this.dataGridView1.TabIndex = 29;
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(409, 14);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(242, 23);
-            this.progressBar1.TabIndex = 28;
             // 
             // button3
             // 
@@ -444,6 +442,35 @@ namespace MonthReadingRecalculation
             this.label12.Size = new System.Drawing.Size(274, 25);
             this.label12.TabIndex = 23;
             this.label12.Text = "Put the card on the reader and press read";
+            // 
+            // MonitorLogs
+            // 
+            this.MonitorLogs.Controls.Add(this.label3);
+            this.MonitorLogs.Controls.Add(this.MonitorLogsText);
+            this.MonitorLogs.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.MonitorLogs.Location = new System.Drawing.Point(4, 25);
+            this.MonitorLogs.Name = "MonitorLogs";
+            this.MonitorLogs.Size = new System.Drawing.Size(1018, 480);
+            this.MonitorLogs.TabIndex = 10;
+            this.MonitorLogs.Text = "Monitor Logs";
+            this.MonitorLogs.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.Location = new System.Drawing.Point(12, 21);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(342, 25);
+            this.label3.TabIndex = 32;
+            this.label3.Text = "You can monitor all your audits and actions from here";
+            // 
+            // MonitorLogsText
+            // 
+            this.MonitorLogsText.Location = new System.Drawing.Point(15, 68);
+            this.MonitorLogsText.Name = "MonitorLogsText";
+            this.MonitorLogsText.ReadOnly = true;
+            this.MonitorLogsText.Size = new System.Drawing.Size(984, 378);
+            this.MonitorLogsText.TabIndex = 22;
+            this.MonitorLogsText.Text = "";
             // 
             // UpdateReviewCardDate
             // 
@@ -734,6 +761,50 @@ namespace MonthReadingRecalculation
             this.label11.TabIndex = 45;
             this.label11.Text = "Fix and recalculate wrong month readings ";
             // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(59, 23);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(63, 25);
+            this.label4.TabIndex = 33;
+            this.label4.Text = "MeterNo";
+            // 
+            // MtrTarget
+            // 
+            this.MtrTarget.Location = new System.Drawing.Point(128, 23);
+            this.MtrTarget.Name = "MtrTarget";
+            this.MtrTarget.Size = new System.Drawing.Size(106, 24);
+            this.MtrTarget.TabIndex = 34;
+            // 
+            // ChNoTarget
+            // 
+            this.ChNoTarget.Location = new System.Drawing.Point(391, 22);
+            this.ChNoTarget.Name = "ChNoTarget";
+            this.ChNoTarget.Size = new System.Drawing.Size(45, 24);
+            this.ChNoTarget.TabIndex = 35;
+            this.ChNoTarget.WordWrap = false;
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(308, 22);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(77, 25);
+            this.label5.TabIndex = 36;
+            this.label5.Text = "ChargeNo";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.ChNoTarget);
+            this.groupBox1.Controls.Add(this.label5);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.MtrTarget);
+            this.groupBox1.Location = new System.Drawing.Point(501, 9);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(480, 63);
+            this.groupBox1.TabIndex = 37;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Test Meter";
+            // 
             // FrmRecalculate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -754,6 +825,7 @@ namespace MonthReadingRecalculation
             this.tabControl1.ResumeLayout(false);
             this.ReadRetrievalTab.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.MonitorLogs.ResumeLayout(false);
             this.UpdateReviewCardDate.ResumeLayout(false);
             this.UpdateReviewCardDate.PerformLayout();
             this.UpdateTarrifDifference.ResumeLayout(false);
@@ -762,6 +834,8 @@ namespace MonthReadingRecalculation
             this.FixSewageCalc.PerformLayout();
             this.CorrectReadingQuantity.ResumeLayout(false);
             this.CorrectReadingQuantity.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -824,7 +898,6 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TabPage ReadRetrievalTab;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button button6;
@@ -832,5 +905,13 @@ namespace MonthReadingRecalculation
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TabPage MonitorLogs;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.RichTextBox MonitorLogsText;
+        private System.Windows.Forms.TextBox MtrTarget;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TextBox ChNoTarget;
+        private System.Windows.Forms.Label label5;
     }
 }
