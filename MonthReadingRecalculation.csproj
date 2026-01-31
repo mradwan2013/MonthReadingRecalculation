@@ -104,14 +104,11 @@
     <Content Include="ExternalLibraries\Card Libraries\COMDLL.DLL" />
     <Content Include="ExternalLibraries\Card Libraries\D8Reader.dll" />
     <Content Include="ExternalLibraries\Card Libraries\dcrf32.dll" />
-    <Content Include="ExternalLibraries\Card Libraries\GetDiskSerial.dll" />
     <Content Include="ExternalLibraries\Card Libraries\JDMultiMifareDLL.dll" />
     <Content Include="ExternalLibraries\Card Libraries\MasterCom.dll" />
     <Content Include="ExternalLibraries\Card Libraries\MasterRD.dll" />
-    <Content Include="ExternalLibraries\Card Libraries\Microsoft.VisualBasic.PowerPacks.Vs.dll" />
     <Content Include="ExternalLibraries\Card Libraries\MifareDll.dll" />
     <Content Include="ExternalLibraries\Card Libraries\scardsyn.dll" />
-    <Content Include="ExternalLibraries\Card Libraries\SingleInstancing.dll" />
     <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMCardTran.dll" />
     <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMCardTranV8.dll" />
     <Content Include="ExternalLibraries\Card Libraries\SWMultiMifareEGYWMDLL.dll" />

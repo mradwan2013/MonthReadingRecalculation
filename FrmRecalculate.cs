@@ -2382,10 +2382,10 @@ namespace MonthReadingRecalculation
             AuditActions("===========================================================" + System.Environment.NewLine, true);
 
             string sql = " SELECT getdate() as currentServerDate ,LoginTrials,ThirdPartyCommission,DataBaseNumber,CurrencyRatio,DefaultOperation,"+
-                         " AutoLockTime,MaxOfflineTransaction , offlineCheckMin,MaxInstalmentsAmount,ReplaceCardFees,DefaultInstalmentsNumber, ExpirePeriod," +
+                         " AutoLockTime,MaxOfflineTransaction , offlineCheckMin,MaxInstalmentsAmount,DefaultInstalmentsNumber, ExpirePeriod," +
                          " UNameOperator,UNameValue,UnameIsActive,PassOperator,PassValue,PassIsActive,changePasswordfirsttime," +
                          " AllowChargeOn , AllowChargeOff , SellingDate , RFDBNum ,settlementType , settlementDayCount , EnableCashierBalance,"+
-                         " GracePeriod ,CompanyCode ,SoftwareVersion ,StartHour , StartMin ,EndHour,EndMin , ReportConnectionString, WarningNotificationLicence,ChangeReplaceCardFee"+
+                         " GracePeriod ,CompanyCode ,SoftwareVersion ,StartHour , StartMin ,EndHour,EndMin "+
                          " FROM Settings with(nolock)";
             settingtbl = ExecuteSelectQuery(sql);
 
@@ -2623,6 +2623,8 @@ namespace MonthReadingRecalculation
                             {
                                 AuditActions("Unable to read non-retrieval cards" + System.Environment.NewLine, true);
                                 AuditActions("===========================================================" + System.Environment.NewLine, true);
+
+                                MessageBox.Show("Unable to read non-retrieval cards");
                             }
                         }
                     }
@@ -2630,13 +2632,17 @@ namespace MonthReadingRecalculation
                     {
                         AuditActions("Unable to read retrieval card make sure to use the correct card" + System.Environment.NewLine, true);
                         AuditActions("===========================================================" + System.Environment.NewLine, true);
+
+                        MessageBox.Show("Unable to read retrieval card make sure to use the correct card");
                     }
                 }
                 catch(Exception ex)
                 {
-                    AuditActions("Error occurred during read retrieval card" + System.Environment.NewLine, true);
+                    AuditActions("Error occurred during reading retrieval card" + System.Environment.NewLine, true);
                     AuditActions("Exeption:"+ex.InnerException + System.Environment.NewLine, true);
                     AuditActions("===========================================================" + System.Environment.NewLine, true);
+
+                    MessageBox.Show("Error occurred during reading retrieval card");
                 }
             }
         }
@@ -2813,11 +2819,11 @@ namespace MonthReadingRecalculation
                         if (meterInfoDt != null && meterInfoDt.Rows.Count> 0)
                         {
                             sql = $@"insert into Charges(MakeCard, UserID, MeterID, ChargeValue, ChargeMethod, curdate, ServerDate, VendingStation,[Type], SerialNo, TotalValue, ValidateKey, PaymentType, DeliveryMethod, PaymentNumber, OriginalRequestDateTime, ConcentratorID,
-                             ValidateKey2, ValidateKey3, CustomerID, ActivityID, AccountNo, ChargeNo, IsThirdParty, balance, RemainCredit, OverdraftCredit, OfflineMode, VendingStationid, BanksID, PhaseNo, UnitNo, TariffStartDate, MeterCompanyCode, DepartmentID, Softwareversion, PaymentMethod, CollectionMethod, IMEI)
+                             ValidateKey2, ValidateKey3, CustomerID, ActivityID, AccountNo, ChargeNo, IsThirdParty, balance, RemainCredit, OfflineMode, VendingStationid, BanksID, PhaseNo, UnitNo, TariffStartDate, MeterCompanyCode, Softwareversion)
                              Values(1, '{DBNumber}-1', '{DBNumber}-{kvp.Key}', 0.00, 1, convert(datetime, getdate(), 103), convert(datetime, getdate(), 103),
-                             '{VendingStationName}', 1, 'Temp_{sr_No}', 0.00, '', 'Cash', 'RFID', '', convert(datetime, getdate(), 103),'{meterInfoDt.Rows[0]["ConcentratorID"]}', '', '',
-                             '{meterInfoDt.Rows[0]["CustomerId"]}', '{meterInfoDt.Rows[0]["ActivityID"]}', '{meterInfoDt.Rows[0]["AccountNo"]}', {kvp.Value-1}, 0, 0.00, 0.0, 0.0, 0,'{DBNumber}-1', '', {meterInfoDt.Rows[0]["PhaseNo"]}, '{meterInfoDt.Rows[0]["GuCode"]}',
-                             (SELECT MAX(CONVERT(datetime, t.startdate, 101)) from tariffdetails t with(nolock) WHERE CONVERT(datetime, getdate(), 103) >= CONVERT(datetime, t.startdate, 103) AND ActivityID = '{meterInfoDt.Rows[0]["ActivityID"]}'),{CompanyCode},'{meterInfoDt.Rows[0]["DepartmentID"]}','{strVersion}', '' , '' , '')";
+                             (select top 1 Name from VendingStations where Id = '{DBNumber}-1'), 1, 'Temp_{sr_No}', 0.00, '', 'Cash', 'RFID', '', convert(datetime, getdate(), 103),'{meterInfoDt.Rows[0]["ConcentratorID"]}', '', '',
+                             '{meterInfoDt.Rows[0]["CustomerId"]}', '{meterInfoDt.Rows[0]["ActivityID"]}', '{meterInfoDt.Rows[0]["AccountNo"]}', {kvp.Value-1}, 0, 0.00, 0.0, 0,'{DBNumber}-1', '', {meterInfoDt.Rows[0]["PhaseNo"]}, '{meterInfoDt.Rows[0]["GuCode"]}',
+                             (SELECT MAX(CONVERT(datetime, t.startdate, 101)) from tariffdetails t with(nolock) WHERE CONVERT(datetime, getdate(), 103) >= CONVERT(datetime, t.startdate, 103) AND ActivityID = '{meterInfoDt.Rows[0]["ActivityID"]}'),{CompanyCode},'{strVersion}')";
 
                             var res = new dboperation(connectionString).ExecuteNonQuery(sql);
 
