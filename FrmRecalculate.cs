@@ -2365,6 +2365,9 @@ namespace MonthReadingRecalculation
         /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
+            dataGridView1.DataSource = new DataTable();
+            dataGridView2.DataSource = new DataTable();
+
             if (!string.IsNullOrEmpty(MtrTarget.Text))
             {
                 testSample = true;
@@ -2654,6 +2657,8 @@ namespace MonthReadingRecalculation
         /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
+            dataGridView2.DataSource = new DataTable();
+
             AuditActions("Begin to load not valid meters " + System.Environment.NewLine, true);
 
             if (dataGridView1.Rows.Count > 1)
@@ -2812,18 +2817,22 @@ namespace MonthReadingRecalculation
                     try
                     {
                         // Select Meter
-                        sql = $@"select top 1 * from Meters where meterId = '{DBNumber}-{kvp.Key}'";
+                        sql = $@"select top 1 *,
+                                (SELECT top 1 c.ChargeNo FROM Charges c WHERE c.MeterID = Meters.MeterID AND c.MakeCard = 1 Order by id desc) AS LatestChargeNo
+                                from Meters where meterId = '{DBNumber}-{kvp.Key}'";
                         var meterInfoDt = ExecuteSelectQuery(sql);
 
+                        int latestChargeNo = meterInfoDt.Rows[0]["LatestChargeNo"] != DBNull.Value ? Convert.ToInt32(meterInfoDt.Rows[0]["LatestChargeNo"]): 0;
+                        
                         // Insert Charge
-                        if (meterInfoDt != null && meterInfoDt.Rows.Count> 0)
+                        if (meterInfoDt != null && meterInfoDt.Rows.Count> 0 && latestChargeNo != (kvp.Value-1))
                         {
-                            sql = $@"insert into Charges(MakeCard, UserID, MeterID, ChargeValue, ChargeMethod, curdate, ServerDate, VendingStation,[Type], SerialNo, TotalValue, ValidateKey, PaymentType, DeliveryMethod, PaymentNumber, OriginalRequestDateTime, ConcentratorID,
+                            sql = $@" Insert into Charges(MakeCard, UserID, MeterID, ChargeValue, ChargeMethod, curdate, ServerDate, VendingStation,[Type], SerialNo, TotalValue, ValidateKey, PaymentType, DeliveryMethod, PaymentNumber, OriginalRequestDateTime, ConcentratorID,
                              ValidateKey2, ValidateKey3, CustomerID, ActivityID, AccountNo, ChargeNo, IsThirdParty, balance, RemainCredit, OfflineMode, VendingStationid, BanksID, PhaseNo, UnitNo, TariffStartDate, MeterCompanyCode, Softwareversion)
                              Values(1, '{DBNumber}-1', '{DBNumber}-{kvp.Key}', 0.00, 1, convert(datetime, getdate(), 103), convert(datetime, getdate(), 103),
                              (select top 1 Name from VendingStations where Id = '{DBNumber}-1'), 1, 'Temp_{sr_No}', 0.00, '', 'Cash', 'RFID', '', convert(datetime, getdate(), 103),'{meterInfoDt.Rows[0]["ConcentratorID"]}', '', '',
                              '{meterInfoDt.Rows[0]["CustomerId"]}', '{meterInfoDt.Rows[0]["ActivityID"]}', '{meterInfoDt.Rows[0]["AccountNo"]}', {kvp.Value-1}, 0, 0.00, 0.0, 0,'{DBNumber}-1', '', {meterInfoDt.Rows[0]["PhaseNo"]}, '{meterInfoDt.Rows[0]["GuCode"]}',
-                             (SELECT MAX(CONVERT(datetime, t.startdate, 101)) from tariffdetails t with(nolock) WHERE CONVERT(datetime, getdate(), 103) >= CONVERT(datetime, t.startdate, 103) AND ActivityID = '{meterInfoDt.Rows[0]["ActivityID"]}'),{CompanyCode},'{strVersion}')";
+                             (SELECT MAX(CONVERT(datetime, t.startdate, 101)) from tariffdetails t with(nolock) WHERE CONVERT(datetime, getdate(), 103) >= CONVERT(datetime, t.startdate, 103) AND ActivityID = '{meterInfoDt.Rows[0]["ActivityID"]}'),{CompanyCode},'{strVersion}');";
 
                             var res = new dboperation(connectionString).ExecuteNonQuery(sql);
 
